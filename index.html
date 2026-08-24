@@ -213,6 +213,66 @@
         .coleccion-item:last-child { border-bottom: none; }
         .bloqueado { opacity: 0.4; }
         .desbloqueado { color: var(--stamp-red); }
+        /* ---- Intro de vuelo estilo VS de pelea ---- */
+        #intro-vuelo {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            background: linear-gradient(180deg, #0a1f33 0%, #123a52 55%, #1a4a6a 100%);
+            overflow: hidden;
+        }
+        #intro-cielo { position: absolute; inset: 0; }
+        #intro-avion {
+            position: absolute;
+            top: 38%;
+            left: -15%;
+            font-size: 2.6rem;
+            filter: drop-shadow(0 0 12px rgba(255,255,255,0.5));
+            animation: volar 1.1s cubic-bezier(0.65,0,0.35,1) forwards;
+        }
+        @keyframes volar {
+            0%   { left: -15%; transform: translateY(0) rotate(-6deg) scale(0.8); opacity: 0; }
+            12%  { opacity: 1; }
+            55%  { left: 48%; transform: translateY(-10px) rotate(-6deg) scale(1.15); }
+            100% { left: 120%; transform: translateY(-4px) rotate(4deg) scale(0.85); opacity: 0.9; }
+        }
+        #intro-franja {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.4);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: linear-gradient(90deg, rgba(20,10,5,0) 0%, rgba(20,10,5,0.88) 15%, rgba(20,10,5,0.88) 85%, rgba(20,10,5,0) 100%);
+            padding: 18px 10px;
+            width: 100%;
+            justify-content: center;
+            opacity: 0;
+            animation: franjaEntra 0.5s ease 0.55s forwards;
+        }
+        @keyframes franjaEntra {
+            0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+            60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        #intro-bandera { font-size: 3.2rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
+        #intro-textos { text-align: left; }
+        #intro-pais {
+            font-family: 'Fraunces', serif;
+            font-weight: 900;
+            font-size: 1.7rem;
+            letter-spacing: 0.03em;
+            color: var(--gold-bright);
+            text-shadow: 0 3px 0 rgba(0,0,0,0.5);
+        }
+        #intro-saludo {
+            font-family: 'Fraunces', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--parchment);
+            opacity: 0.9;
+        }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
@@ -261,9 +321,17 @@
                 <button class="boton" id="btn-reiniciar-nivel" style="width:45%; padding:10px;">🔄 Reiniciar</button>
                 <button class="boton boton-secundario" id="btn-salir-juego" style="width:45%; padding:10px;">🚪 Salir</button>
             </div>
-            <div id="mensaje-saludo" class="mensaje-flotante oculto">
-                <div id="texto-saludo" class="saludo-bienvenida">¡HOLA!</div>
-                <p id="pais-saludo" style="margin-top:10px;">🇲🇽 México</p>
+            <div id="intro-vuelo" class="oculto">
+                <div id="intro-cielo">
+                    <div id="intro-avion">✈️</div>
+                </div>
+                <div id="intro-franja">
+                    <span id="intro-bandera">🇲🇽</span>
+                    <div id="intro-textos">
+                        <div id="intro-pais">MÉXICO</div>
+                        <div id="intro-saludo">¡HOLA!</div>
+                    </div>
+                </div>
             </div>
             <div id="mensaje-fin-nivel" class="mensaje-flotante oculto">
                 <h2>Nivel completado</h2>
@@ -340,7 +408,7 @@
         { nombre: 'Grecia', bandera: '🇬🇷', saludo: 'YASSOU!' }
     ];
     const NIVELES_POR_PAIS = 10;
-    const BOLAS_POR_NIVEL = [1,3,3,6,6,6,10,10,15,15]; // más bolas = más difícil
+    const BOLAS_POR_NIVEL = [6,7,8,9,10,10,12,13,15,15]; // más bolas = más difícil
 
     // ---- Estado del progreso (solo en memoria de esta sesión) ----
     let progreso = paises.map((p, i) => ({ unlocked: i === 0, nivelesCompletados: 0 }));
@@ -379,6 +447,7 @@
 
     let isDragging = false;
     let dragStartX = 0, dragStartY = 0, dragEndX = 0, dragEndY = 0;
+    let golpeAnim = null; // { angle, t0 } animación del taco al soltar
 
     function resizeCanvas() {
         const container = canvas.parentElement;
@@ -528,6 +597,68 @@
         ctx.fill();
     }
 
+    // ---- Taco de billar ----
+    function dibujarTaco() {
+        if (!cueBall) return;
+        const cx = cueBall.position.x, cy = cueBall.position.y;
+        let angulo, retroceso;
+
+        if (isDragging) {
+            const dx = dragStartX - dragEndX;
+            const dy = dragStartY - dragEndY;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            if (len < 2) return;
+            angulo = Math.atan2(dy, dx); // dirección del taco = opuesta al tiro
+            const maxLen = 80;
+            retroceso = 14 + Math.min(len, maxLen) * 0.6;
+        } else if (golpeAnim) {
+            const t = (performance.now() - golpeAnim.t0) / 160; // 0..1
+            if (t >= 1) { golpeAnim = null; return; }
+            angulo = golpeAnim.angle;
+            // el taco "empuja" hacia la bola y luego se retira
+            retroceso = 14 + (t < 0.35 ? (0.35 - t) / 0.35 * -30 : (t - 0.35) / 0.65 * 40);
+        } else {
+            return; // sin taco visible en reposo (como en billar real, se toma antes de tirar)
+        }
+
+        const dirX = Math.cos(angulo), dirY = Math.sin(angulo);
+        const tacoLargo = 130;
+        const x1 = cx + dirX * retroceso;
+        const y1 = cy + dirY * retroceso;
+        const x2 = x1 + dirX * tacoLargo;
+        const y2 = y1 + dirY * tacoLargo;
+
+        ctx.save();
+        // sombra del taco
+        ctx.beginPath();
+        ctx.moveTo(x1, y1 + 3);
+        ctx.lineTo(x2, y2 + 3);
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // cuerpo del taco: degradado madera clara -> oscura, punta clara
+        const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+        grad.addColorStop(0, '#e8c874');
+        grad.addColorStop(0.15, '#c9a24a');
+        grad.addColorStop(1, '#3f2415');
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // puntera azul (tip)
+        ctx.beginPath();
+        ctx.arc(x1, y1, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#3a6fa8';
+        ctx.fill();
+        ctx.restore();
+    }
+
     function draw() {
         const w = canvas.width, h = canvas.height;
         ctx.clearRect(0, 0, w, h);
@@ -578,6 +709,7 @@
             const body = entry.body;
             dibujarBola(body.position.x, body.position.y, COLORES[i % COLORES.length], false, i + 1);
         });
+        dibujarTaco();
         if (cueBall) dibujarBola(cueBall.position.x, cueBall.position.y, null, true, 0);
 
         if (isDragging) {
@@ -736,6 +868,7 @@
             const ratio = clampedLen / maxLen;
             const power = ratio * 20;
             const angle = Math.atan2(dy, dx);
+            golpeAnim = { angle: angle, t0: performance.now() };
 
             Matter.Body.setVelocity(cueBall, { x: Math.cos(angle) * power, y: Math.sin(angle) * power });
 
@@ -779,12 +912,19 @@
         }
         const nivelInicial = Math.min(progreso[paisSeleccionado].nivelesCompletados + 1, NIVELES_POR_PAIS);
         mostrarPantalla('pantalla-juego');
-        const saludo = document.getElementById('mensaje-saludo');
-        document.getElementById('texto-saludo').textContent = paises[paisSeleccionado].saludo;
-        document.getElementById('pais-saludo').textContent = `${paises[paisSeleccionado].bandera} ${paises[paisSeleccionado].nombre}`;
-        saludo.classList.remove('oculto');
-        setTimeout(() => saludo.classList.add('oculto'), 1600);
-        setTimeout(() => iniciarNivel(paisSeleccionado, nivelInicial), 1700);
+        const intro = document.getElementById('intro-vuelo');
+        document.getElementById('intro-bandera').textContent = paises[paisSeleccionado].bandera;
+        document.getElementById('intro-pais').textContent = paises[paisSeleccionado].nombre.toUpperCase();
+        document.getElementById('intro-saludo').textContent = paises[paisSeleccionado].saludo;
+        // reinicia animaciones por si se repite
+        const avion = document.getElementById('intro-avion');
+        const franja = document.getElementById('intro-franja');
+        avion.style.animation = 'none'; franja.style.animation = 'none';
+        void avion.offsetWidth;
+        avion.style.animation = ''; franja.style.animation = '';
+        intro.classList.remove('oculto');
+        setTimeout(() => intro.classList.add('oculto'), 1900);
+        setTimeout(() => iniciarNivel(paisSeleccionado, nivelInicial), 1950);
     };
 
     document.getElementById('btn-pausa').onclick = () => {
