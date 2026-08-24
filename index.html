@@ -3,29 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌍 Billar Mundial</title>
+    <title>Billar Mundial — Pasaporte de Cantina</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #0a1a0f; 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
+        :root {
+            --felt-deep: #0d3b2e;
+            --felt-light: #175c46;
+            --felt-glow: #2a8863;
+            --wood: #3f2415;
+            --wood-light: #6b3f24;
+            --gold: #c9a24a;
+            --gold-bright: #e8c874;
+            --parchment: #f3e7cd;
+            --parchment-dim: #e6d5ac;
+            --ink: #241a10;
+            --stamp-red: #9c3b2c;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at 50% 0%, #16281f 0%, #060f0b 70%);
+            color: var(--parchment);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             overflow: hidden;
         }
+        h1, h2, .display { font-family: 'Fraunces', serif; }
         #app {
             width: 100%;
             max-width: 450px;
             height: 100vh;
             max-height: 800px;
-            background: #1a3a2a;
-            border-radius: 20px;
+            background:
+                linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)),
+                repeating-linear-gradient(115deg, var(--wood) 0 3px, var(--wood-light) 3px 6px);
+            border-radius: 22px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            box-shadow: 0 0 0 8px var(--wood), 0 0 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.5);
         }
         .pantalla {
             width: 100%;
@@ -34,85 +53,123 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 22px;
             position: absolute;
             top: 0;
             left: 0;
         }
-        .pantalla.activa { display: flex; }
-        h1 { font-size: 2.5rem; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
-        h2 { font-size: 1.8rem; margin-bottom: 15px; }
+        .pantalla.activa { display: flex; animation: aparecer 0.35s ease; }
+        @keyframes aparecer { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: var(--gold-bright);
+            text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 25px rgba(201,162,74,0.35);
+            text-align: center;
+        }
+        .subtitulo-inicio { font-family: 'Inter', sans-serif; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.7rem; opacity: 0.65; margin: 10px 0 34px; }
+        h2 { font-size: 1.5rem; margin-bottom: 15px; color: var(--gold-bright); font-weight: 700; }
         .boton {
-            background: #f5c842;
-            color: #1a3a2a;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+            color: var(--ink);
             border: none;
             padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 50px;
-            margin: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            border-radius: 12px;
+            margin: 8px;
             cursor: pointer;
-            box-shadow: 0 5px 0 #b38a2a;
+            box-shadow: 0 4px 0 #8a6b28, 0 6px 14px rgba(0,0,0,0.4);
             width: 80%;
             max-width: 300px;
             text-align: center;
+            transition: transform 0.05s;
         }
-        .boton:active {
-            transform: translateY(5px);
-            box-shadow: 0 1px 0 #b38a2a;
-        }
+        .boton:active { transform: translateY(4px); box-shadow: 0 0 0 #8a6b28; }
+        .boton:disabled { opacity: 0.4; cursor: not-allowed; }
         .boton-secundario {
-            background: #2a5a3a;
-            color: white;
-            box-shadow: 0 5px 0 #1a3a2a;
+            background: linear-gradient(180deg, #1f6b4f, var(--felt-deep));
+            color: var(--parchment);
+            box-shadow: 0 4px 0 #06231a, 0 6px 14px rgba(0,0,0,0.4);
         }
+        .boton-secundario:active { box-shadow: 0 0 0 #06231a; }
         .barra-superior {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             width: 100%;
-            padding: 10px 20px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 15px;
+            padding: 10px 18px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.3));
+            border: 1px solid rgba(201,162,74,0.25);
+            border-radius: 14px;
             margin-bottom: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gold-bright);
         }
         .mapa-container {
             width: 100%;
-            height: 70%;
+            height: 60%;
             position: relative;
-            border-radius: 20px;
-            background: #1a4a6a;
+            border-radius: 16px;
+            background:
+                radial-gradient(circle at 50% 30%, #123a52 0%, #0a2438 70%);
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            border: 6px solid var(--wood);
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
         }
-        #lienzo-mapa {
-            width: 100%;
-            height: 100%;
-            display: block;
+        #lienzo-mapa { width: 100%; height: 100%; display: block; }
+        .nav-mapa {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(20,10,5,0.55);
+            border: 1px solid rgba(201,162,74,0.4);
+            color: var(--gold-bright);
+            font-size: 1.5rem;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
         }
+        #btn-mapa-prev { left: 10px; }
+        #btn-mapa-next { right: 10px; }
         .info-viaje {
-            background: rgba(0,0,0,0.6);
-            padding: 15px 25px;
-            border-radius: 15px;
+            background: var(--parchment);
+            color: var(--ink);
+            padding: 12px 25px;
+            border-radius: 10px;
             text-align: center;
-            margin: 10px 0;
+            margin: 6px 0;
+            width: 90%;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+            position: relative;
         }
-        .saludo-bienvenida {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #f5c842;
-            text-shadow: 0 0 30px rgba(245,200,66,0.8);
-            animation: latido 1s infinite alternate;
+        .info-viaje::before {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; top: 0;
+            height: 4px;
+            background: repeating-linear-gradient(90deg, var(--stamp-red) 0 10px, transparent 10px 18px);
+            border-radius: 10px 10px 0 0;
         }
-        @keyframes latido {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
-        }
+        #info-pais { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.15rem; }
+        #info-nivel { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
+        .saludo-bienvenida { font-size: 2.8rem; font-weight: 900; font-family: 'Fraunces', serif; color: var(--gold-bright); text-shadow: 0 0 30px rgba(232,200,116,0.8); animation: latido 1s infinite alternate; }
+        @keyframes latido { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
         #canvas-juego {
             width: 100%;
-            height: 70%;
-            background: #1a5a2a;
-            border-radius: 20px;
+            height: 66%;
+            background: var(--felt-deep);
+            border-radius: 10px;
             touch-action: none;
+            cursor: pointer;
+            border: 14px solid var(--wood);
+            box-shadow: 0 0 0 2px var(--wood-light), inset 0 0 25px rgba(0,0,0,0.55);
         }
         .oculto { display: none !important; }
         .mensaje-flotante {
@@ -120,34 +177,69 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
-            padding: 30px 50px;
-            border-radius: 20px;
+            background: var(--parchment);
+            color: var(--ink);
+            padding: 28px 36px;
+            border-radius: 14px;
             text-align: center;
             z-index: 10;
-            border: 3px solid #f5c842;
+            border: 3px solid var(--gold);
+            min-width: 220px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
+        .mensaje-flotante h2 { color: var(--stamp-red); margin-bottom: 8px; }
+        .mensaje-flotante p { opacity: 0.8; }
+        .mensaje-flotante button { width: auto; padding: 10px 30px; margin: 14px auto 0; }
+        .controles-juego { display: flex; width: 100%; justify-content: space-between; padding: 8px 6px; gap: 10px; }
+        .controles-juego .boton { width: 46%; padding: 11px; margin: 0; font-size: 0.85rem; }
+        #pantalla-pausa .boton { width: 80%; }
+        #pantalla-config .boton { width: 60%; }
+        #pantalla-coleccion .boton { width: 60%; }
+        .config-item {
+            display: flex; justify-content: space-between; align-items:center; width: 100%;
+            padding: 12px 14px; background: var(--parchment); color: var(--ink);
+            border-radius: 10px; margin: 5px 0; font-weight: 600; font-size: 0.9rem;
+        }
+        .config-item select {
+            font-family: 'Inter', sans-serif; font-weight: 600; border-radius: 6px; border: 1px solid var(--gold); padding: 4px 8px; background: white;
+        }
+        #lista-coleccion {
+            width: 92%; max-height: 58%; overflow-y: auto;
+            background: var(--parchment); color: var(--ink);
+            border-radius: 14px; padding: 6px 14px; margin-bottom: 15px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.15);
+        }
+        .coleccion-item { display: flex; justify-content: space-between; align-items:center; padding: 11px 4px; border-bottom: 1px dashed rgba(36,26,16,0.25); font-weight: 600; font-size: 0.92rem; }
+        .coleccion-item:last-child { border-bottom: none; }
+        .bloqueado { opacity: 0.4; }
+        .desbloqueado { color: var(--stamp-red); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
     </style>
 </head>
 <body>
     <div id="app">
+        <!-- ===== INICIO ===== -->
         <div id="pantalla-inicio" class="pantalla activa">
-            <h1>🌍 BILLAR MUNDIAL</h1>
-            <p style="margin-bottom:30px; opacity:0.8;">Viaja por 10 países</p>
+            <h1>Billar Mundial</h1>
+            <p class="subtitulo-inicio">10 países · un taco · un pasaporte</p>
             <button class="boton" id="btn-viaje">✈️ Viaje Mundial</button>
-            <button class="boton boton-secundario" id="btn-rapida">🎱 Partida Rápida</button>
-            <button class="boton boton-secundario" id="btn-2jugadores">👥 2 Jugadores</button>
             <button class="boton boton-secundario" id="btn-coleccion">🏆 Colección</button>
             <button class="boton boton-secundario" id="btn-config">⚙️ Configuración</button>
         </div>
+
+        <!-- ===== MAPA ===== -->
         <div id="pantalla-mapa" class="pantalla">
             <div class="barra-superior">
                 <span id="mapa-progreso">🌍 0/10</span>
                 <span id="mapa-monedas">💰 0</span>
-                <button id="btn-volver-inicio" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
+                <button id="btn-volver-inicio-mapa" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
             </div>
             <div class="mapa-container">
                 <canvas id="lienzo-mapa"></canvas>
+                <button class="nav-mapa" id="btn-mapa-prev">◀</button>
+                <button class="nav-mapa" id="btn-mapa-next">▶</button>
             </div>
             <div class="info-viaje">
                 <p id="info-pais">🇲🇽 México</p>
@@ -155,6 +247,8 @@
             </div>
             <button class="boton" id="btn-jugar-pais">🎱 Jugar</button>
         </div>
+
+        <!-- ===== JUEGO ===== -->
         <div id="pantalla-juego" class="pantalla">
             <div class="barra-superior">
                 <span id="juego-info">🇲🇽 Nivel 1</span>
@@ -163,95 +257,695 @@
                 <button id="btn-pausa" style="background:none; border:none; color:white; font-size:1.5rem;">⏸</button>
             </div>
             <canvas id="canvas-juego"></canvas>
-            <div style="display:flex; width:100%; justify-content:space-between; padding:10px;">
-                <button class="boton" id="btn-disparar" style="width:45%; padding:10px;">🎯 Disparar</button>
-                <button class="boton boton-secundario" id="btn-reiniciar" style="width:45%; padding:10px;">🔄 Reiniciar</button>
+            <div class="controles-juego">
+                <button class="boton" id="btn-reiniciar-nivel" style="width:45%; padding:10px;">🔄 Reiniciar</button>
+                <button class="boton boton-secundario" id="btn-salir-juego" style="width:45%; padding:10px;">🚪 Salir</button>
             </div>
             <div id="mensaje-saludo" class="mensaje-flotante oculto">
                 <div id="texto-saludo" class="saludo-bienvenida">¡HOLA!</div>
                 <p id="pais-saludo" style="margin-top:10px;">🇲🇽 México</p>
             </div>
+            <div id="mensaje-fin-nivel" class="mensaje-flotante oculto">
+                <h2>Nivel completado</h2>
+                <p id="texto-fin-nivel">Has ganado 10 monedas</p>
+                <button class="boton" id="btn-continuar-nivel" style="width:auto; padding:10px 30px;">Continuar</button>
+            </div>
+            <div id="mensaje-gameover" class="mensaje-flotante oculto">
+                <h2>Sin tiros</h2>
+                <p>Inténtalo de nuevo</p>
+                <button class="boton" id="btn-gameover-continuar" style="width:auto; padding:10px 30px;">Reintentar</button>
+            </div>
         </div>
+
+        <!-- ===== PAUSA ===== -->
         <div id="pantalla-pausa" class="pantalla">
             <h2>⏸ Pausa</h2>
             <button class="boton" id="btn-reanudar">▶️ Reanudar</button>
-            <button class="boton boton-secundario" id="btn-reiniciar-pais">🔄 Reiniciar País</button>
-            <button class="boton boton-secundario" id="btn-salir">🚪 Salir</button>
+            <button class="boton boton-secundario" id="btn-reiniciar-pais">🔄 Reiniciar Nivel</button>
+            <button class="boton boton-secundario" id="btn-salir-pausa">🚪 Salir</button>
         </div>
+
+        <!-- ===== CONFIGURACIÓN ===== -->
         <div id="pantalla-config" class="pantalla">
             <h2>⚙️ Configuración</h2>
-            <div style="display:flex; flex-direction:column; gap:15px; width:80%;">
-                <label>🎵 Música: <input type="checkbox" checked></label>
-                <label>🔊 Efectos: <input type="checkbox" checked></label>
-                <label>🗣️ Voz: <input type="checkbox" checked></label>
-                <label>🎯 Dificultad:
-                    <select><option>Fácil</option><option selected>Medio</option><option>Difícil</option></select>
-                </label>
+            <div style="display:flex; flex-direction:column; gap:10px; width:85%;">
+                <div class="config-item"><span>🎵 Música</span> <input type="checkbox" id="config-musica" checked></div>
+                <div class="config-item"><span>🔊 Efectos</span> <input type="checkbox" id="config-efectos" checked></div>
+                <div class="config-item">
+                    <span>🎯 Dificultad</span>
+                    <select id="config-dificultad">
+                        <option value="facil">Fácil</option>
+                        <option value="medio" selected>Medio</option>
+                        <option value="dificil">Difícil</option>
+                    </select>
+                </div>
             </div>
-            <button class="boton boton-secundario" id="btn-cerrar-config">⬅️ Cerrar</button>
+            <button class="boton boton-secundario" id="btn-cerrar-config" style="width:60%;">⬅️ Cerrar</button>
         </div>
+
+        <!-- ===== COLECCIÓN ===== -->
         <div id="pantalla-coleccion" class="pantalla">
             <h2>🏆 Colección</h2>
-            <div style="width:90%; max-height:60%; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:15px; padding:15px;">
-                <p>Completa países para desbloquear</p>
-            </div>
-            <button class="boton boton-secundario" id="btn-cerrar-coleccion">⬅️ Cerrar</button>
+            <div id="lista-coleccion"></div>
+            <button class="boton boton-secundario" id="btn-cerrar-coleccion" style="width:60%;">⬅️ Cerrar</button>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script>
-        function mostrarPantalla(id) {
-            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
-            document.getElementById(id).classList.add('activa');
+    // ============================================================
+    //  BILLAR MUNDIAL — versión corregida y estable
+    //  Cambios clave vs la versión que se trababa:
+    //   1) UN SOLO motor de física y UN SOLO loop de animación,
+    //      creados una vez y reutilizados (antes se creaban de
+    //      nuevo en cada nivel y se acumulaban sin parar).
+    //   2) Se detecta victoria (todas las bolas metidas) y
+    //      derrota (sin tiros) — antes nunca pasaba nada.
+    //   3) La pausa detiene la física de verdad.
+    //   4) La bola blanca se repone si cae en una tronera.
+    //   5) Selección real de país en el mapa (antes siempre
+    //      jugaba México).
+    // ============================================================
+
+    const paises = [
+        { nombre: 'México', bandera: '🇲🇽', saludo: '¡HOLA!' },
+        { nombre: 'Canadá', bandera: '🇨🇦', saludo: 'HELLO!' },
+        { nombre: 'Estados Unidos', bandera: '🇺🇸', saludo: 'HEY!' },
+        { nombre: 'Holanda', bandera: '🇳🇱', saludo: 'HALLO!' },
+        { nombre: 'Alemania', bandera: '🇩🇪', saludo: 'HALLO!' },
+        { nombre: 'Suiza', bandera: '🇨🇭', saludo: 'GRÜEZI!' },
+        { nombre: 'Letonia', bandera: '🇱🇻', saludo: 'SVEIKI!' },
+        { nombre: 'Noruega', bandera: '🇳🇴', saludo: 'HEI!' },
+        { nombre: 'Italia', bandera: '🇮🇹', saludo: 'CIAO!' },
+        { nombre: 'Grecia', bandera: '🇬🇷', saludo: 'YASSOU!' }
+    ];
+    const NIVELES_POR_PAIS = 10;
+    const BOLAS_POR_NIVEL = [1,3,3,6,6,6,10,10,15,15]; // más bolas = más difícil
+
+    // ---- Estado del progreso (solo en memoria de esta sesión) ----
+    let progreso = paises.map((p, i) => ({ unlocked: i === 0, nivelesCompletados: 0 }));
+    let paisSeleccionado = 0;
+    let monedasTotales = 0;
+    let dificultad = 'medio';
+
+    function paramsDificultad() {
+        if (dificultad === 'facil') return { pocketMult: 1.35, tirosExtra: 8 };
+        if (dificultad === 'dificil') return { pocketMult: 0.8, tirosExtra: -5 };
+        return { pocketMult: 1, tirosExtra: 0 };
+    }
+
+    // ---- Estado del nivel actual ----
+    let paisActual = 0, nivelActual = 1;
+    let tirosRestantes = 25;
+    let puedeDisparar = true;
+    let esperandoResultado = false;
+
+    // ---- DOM ----
+    const canvas = document.getElementById('canvas-juego');
+    const ctx = canvas.getContext('2d');
+    const juegoInfo = document.getElementById('juego-info');
+    const juegoTiros = document.getElementById('juego-tiros');
+    const juegoMonedas = document.getElementById('juego-monedas');
+
+    // ---- Matter.js (creados UNA sola vez) ----
+    let engine = null, world = null, runner = null;
+    let cueBall = null;
+    let ballsArr = []; // { body, isPocketed }
+    let walls = [], pockets = [];
+    let cueStartPos = { x: 0, y: 0 };
+    const COLORES = ['#f5c842','#1a5a8a','#c0392b','#8e44ad','#e67e22',
+        '#2ecc71','#e74c3c','#f1c40f','#3498db','#9b59b6',
+        '#1abc9c','#27ae60','#d35400','#2980b9','#c0392b'];
+
+    let isDragging = false;
+    let dragStartX = 0, dragStartY = 0, dragEndX = 0, dragEndY = 0;
+
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+    }
+    window.addEventListener('resize', () => {
+        if (document.getElementById('pantalla-juego').classList.contains('activa')) {
+            resizeCanvas();
+            construirMesa(BOLAS_POR_NIVEL[nivelActual - 1] || 15);
         }
-        document.getElementById('btn-viaje').onclick = () => mostrarPantalla('pantalla-mapa');
-        document.getElementById('btn-volver-inicio').onclick = () => mostrarPantalla('pantalla-inicio');
-        document.getElementById('btn-jugar-pais').onclick = () => {
-            mostrarPantalla('pantalla-juego');
-            const saludo = document.getElementById('mensaje-saludo');
-            document.getElementById('texto-saludo').textContent = '¡HOLA!';
-            document.getElementById('pais-saludo').textContent = '🇲🇽 México';
-            saludo.classList.remove('oculto');
-            setTimeout(() => saludo.classList.add('oculto'), 2500);
-        };
-        document.getElementById('btn-pausa').onclick = () => mostrarPantalla('pantalla-pausa');
-        document.getElementById('btn-reanudar').onclick = () => mostrarPantalla('pantalla-juego');
-        document.getElementById('btn-salir').onclick = () => mostrarPantalla('pantalla-inicio');
-        document.getElementById('btn-cerrar-config').onclick = () => mostrarPantalla('pantalla-inicio');
-        document.getElementById('btn-cerrar-coleccion').onclick = () => mostrarPantalla('pantalla-inicio');
-        document.getElementById('btn-reiniciar-pais').onclick = () => {
-            if(confirm('¿Reiniciar país?')) {
-                alert('País reiniciado');
-                mostrarPantalla('pantalla-mapa');
+    });
+
+    function initEngineOnce() {
+        if (engine) return;
+        engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+        world = engine.world;
+        runner = Matter.Runner.create();
+        Matter.Runner.run(runner, engine);
+
+        Matter.Events.on(engine, 'collisionStart', (event) => {
+            event.pairs.forEach(pair => {
+                let pocket = null, ball = null, isCue = false;
+                const a = pair.bodyA, b = pair.bodyB;
+                if (a.label === 'pocket' && (b.label === 'ball' || b.label === 'cueBall')) { pocket = a; ball = b; isCue = b.label === 'cueBall'; }
+                else if (b.label === 'pocket' && (a.label === 'ball' || a.label === 'cueBall')) { pocket = b; ball = a; isCue = a.label === 'cueBall'; }
+                if (!pocket || !ball) return;
+
+                if (isCue) {
+                    // La bola blanca cayó: se repone en su posición inicial
+                    Matter.Body.setPosition(ball, cueStartPos);
+                    Matter.Body.setVelocity(ball, { x: 0, y: 0 });
+                } else if (!ball.plugin || !ball.plugin.isPocketed) {
+                    ball.plugin = ball.plugin || {};
+                    ball.plugin.isPocketed = true;
+                    Matter.Composite.remove(world, ball);
+                    const entry = ballsArr.find(e => e.body === ball);
+                    if (entry) entry.isPocketed = true;
+                }
+            });
+        });
+    }
+
+    function generarPosicionesRack(n, cx, cy, spacing) {
+        const posiciones = [];
+        let restantes = n, row = 0;
+        while (restantes > 0) {
+            const enFila = Math.min(row + 1, restantes);
+            for (let col = 0; col < enFila; col++) {
+                const x = cx + row * spacing * 0.87;
+                const y = cy + (col - row / 2) * spacing;
+                posiciones.push({ x, y });
             }
-        };
-        document.getElementById('btn-rapida').onclick = () => alert('🎱 Próximamente');
-        document.getElementById('btn-2jugadores').onclick = () => alert('👥 Próximamente');
-        document.getElementById('btn-coleccion').onclick = () => mostrarPantalla('pantalla-coleccion');
-        document.getElementById('btn-config').onclick = () => mostrarPantalla('pantalla-config');
-        document.getElementById('btn-disparar').onclick = () => alert('🎯 ¡Disparo!');
-        document.getElementById('btn-reiniciar').onclick = () => {
-            if(confirm('¿Reiniciar nivel?')) alert('🔄 Reiniciado');
-        };
-        const canvas = document.getElementById('lienzo-mapa');
-        const ctx = canvas.getContext('2d');
-        function dibujarMapa() {
-            const w = canvas.width = canvas.parentElement.clientWidth;
-            const h = canvas.height = canvas.parentElement.clientHeight;
-            ctx.fillStyle = '#0a2a4a';
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = '#f5c842';
-            ctx.font = '40px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('🇲🇽', w/2, h/2 - 20);
-            ctx.fillStyle = 'white';
-            ctx.font = '16px Arial';
-            ctx.fillText('México', w/2, h/2 + 40);
-            ctx.font = '30px Arial';
-            ctx.fillText('✈️', w/2 - 60, h/2 - 30);
+            restantes -= enFila;
+            row++;
         }
-        window.onresize = dibujarMapa;
+        return posiciones;
+    }
+
+    function construirMesa(numBolas) {
+        initEngineOnce();
+        // limpia todo lo anterior sin destruir motor/runner
+        Matter.Composite.clear(world, false);
+        walls = []; pockets = []; ballsArr = [];
+
+        const w = canvas.width, h = canvas.height;
+        const margin = 30;
+        const radioBola = 8;
+        const dif = paramsDificultad();
+
+        const wallOptions = { isStatic: true, friction: 0.3, restitution: 0.85 };
+        walls = [
+            Matter.Bodies.rectangle(w / 2, margin, w - margin * 2, 5, wallOptions),
+            Matter.Bodies.rectangle(w / 2, h - margin, w - margin * 2, 5, wallOptions),
+            Matter.Bodies.rectangle(margin, h / 2, 5, h - margin * 2, wallOptions),
+            Matter.Bodies.rectangle(w - margin, h / 2, 5, h - margin * 2, wallOptions)
+        ];
+        Matter.Composite.add(world, walls);
+
+        const pocketRadius = 16 * dif.pocketMult;
+        const pocketPositions = [
+            { x: margin, y: margin }, { x: w / 2, y: margin - 5 }, { x: w - margin, y: margin },
+            { x: margin, y: h - margin }, { x: w / 2, y: h - margin + 5 }, { x: w - margin, y: h - margin }
+        ];
+        pockets = pocketPositions.map(pos => Matter.Bodies.circle(pos.x, pos.y, pocketRadius, { isStatic: true, isSensor: true, label: 'pocket' }));
+        Matter.Composite.add(world, pockets);
+
+        cueStartPos = { x: w / 2, y: h - margin - 60 };
+        cueBall = Matter.Bodies.circle(cueStartPos.x, cueStartPos.y, radioBola, { restitution: 0.9, friction: 0.05, frictionAir: 0.012, label: 'cueBall' });
+        Matter.Composite.add(world, cueBall);
+
+        const spacing = radioBola * 2 + 2;
+        const rackPos = generarPosicionesRack(numBolas, w / 2 - 80, h / 2 - 20, spacing);
+        rackPos.forEach((p, i) => {
+            const body = Matter.Bodies.circle(p.x, p.y, radioBola, {
+                restitution: 0.9, friction: 0.05, frictionAir: 0.012, label: 'ball'
+            });
+            body.plugin = { isPocketed: false, colorIndex: i };
+            Matter.Composite.add(world, body);
+            ballsArr.push({ body, isPocketed: false });
+        });
+    }
+
+    // ---- Dibujo ----
+    function dibujarBola(x, y, colorPrincipal, esBlanca, numero) {
+        const r = 8;
+        // sombra de contacto
+        ctx.beginPath();
+        ctx.ellipse(x, y + r * 0.75, r * 0.85, r * 0.32, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fill();
+
+        // cuerpo con degradado esférico
+        const grd = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.15, x, y, r * 1.15);
+        if (esBlanca) {
+            grd.addColorStop(0, '#ffffff');
+            grd.addColorStop(1, '#d8d8d8');
+        } else {
+            grd.addColorStop(0, colorPrincipal + 'ff');
+            grd.addColorStop(0.55, colorPrincipal);
+            grd.addColorStop(1, 'rgba(0,0,0,0.55)');
+        }
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = grd;
+        ctx.fill();
+        ctx.lineWidth = 0.7;
+        ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+        ctx.stroke();
+
+        if (!esBlanca) {
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.62, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.92)';
+            ctx.fill();
+            ctx.fillStyle = colorPrincipal;
+            ctx.font = 'bold 6.5px Inter, Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(String(numero), x, y + 0.5);
+        }
+
+        // brillo especular
+        ctx.beginPath();
+        ctx.arc(x - r * 0.35, y - r * 0.42, r * 0.28, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.fill();
+    }
+
+    function draw() {
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        // fieltro con viñeta y textura sutil
+        const grad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h) * 0.72);
+        grad.addColorStop(0, '#1f6b4f');
+        grad.addColorStop(0.6, '#155c42');
+        grad.addColorStop(1, '#0a2e21');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        // línea central "de spot" como mesas reales
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(w / 2, 30);
+        ctx.lineTo(w / 2, h - 30);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(60,30,10,0.9)';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(25, 25, w - 50, h - 50);
+
+        const dif = paramsDificultad();
+        const pocketRadius = 16 * dif.pocketMult;
+        const pocketPositions = [
+            { x: 30, y: 30 }, { x: w / 2, y: 25 }, { x: w - 30, y: 30 },
+            { x: 30, y: h - 30 }, { x: w / 2, y: h - 25 }, { x: w - 30, y: h - 30 }
+        ];
+        pocketPositions.forEach(p => {
+            const pg = ctx.createRadialGradient(p.x, p.y, 1, p.x, p.y, pocketRadius);
+            pg.addColorStop(0, '#000000');
+            pg.addColorStop(1, '#2b1508');
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, pocketRadius, 0, Math.PI * 2);
+            ctx.fillStyle = pg;
+            ctx.fill();
+            ctx.strokeStyle = '#c9a24a';
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.5;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        });
+
+        ballsArr.forEach((entry, i) => {
+            if (entry.isPocketed) return;
+            const body = entry.body;
+            dibujarBola(body.position.x, body.position.y, COLORES[i % COLORES.length], false, i + 1);
+        });
+        if (cueBall) dibujarBola(cueBall.position.x, cueBall.position.y, null, true, 0);
+
+        if (isDragging) {
+            const dx = dragStartX - dragEndX;
+            const dy = dragStartY - dragEndY;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            if (len > 1) {
+                const maxLen = 80;
+                const clampedLen = Math.min(len, maxLen);
+                const ratio = clampedLen / maxLen;
+                const power = ratio * 20;
+
+                ctx.beginPath();
+                ctx.moveTo(dragStartX, dragStartY);
+                ctx.lineTo(dragStartX - dx / len * clampedLen, dragStartY - dy / len * clampedLen);
+                ctx.strokeStyle = `rgba(232, 200, 116, ${0.35 + ratio * 0.65})`;
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = '#e8c874';
+                ctx.font = '600 13px Inter, Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.round(power)}`, dragStartX, dragStartY - 40);
+            }
+        }
+
+        const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = '600 12px Inter, Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`Faltan ${bolasVivas}`, 20, 18);
+    }
+
+    // ---- Loop persistente (uno solo, siempre) ----
+    let rafId = null;
+    function loopStep() {
+        if (document.getElementById('pantalla-juego').classList.contains('activa') && runner && runner.enabled) {
+            draw();
+            revisarSiSeDetuvieron();
+        }
+        rafId = requestAnimationFrame(loopStep);
+    }
+    if (!rafId) rafId = requestAnimationFrame(loopStep);
+
+    function todasQuietas() {
+        const umbral = 0.05;
+        if (cueBall) {
+            const v = cueBall.velocity;
+            if (Math.sqrt(v.x * v.x + v.y * v.y) > umbral) return false;
+        }
+        for (const e of ballsArr) {
+            if (e.isPocketed) continue;
+            const v = e.body.velocity;
+            if (Math.sqrt(v.x * v.x + v.y * v.y) > umbral) return false;
+        }
+        return true;
+    }
+
+    function revisarSiSeDetuvieron() {
+        if (!esperandoResultado) return;
+        if (!todasQuietas()) return;
+        esperandoResultado = false;
+        puedeDisparar = true;
+
+        const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
+        if (bolasVivas === 0) {
+            ganarNivel();
+        } else if (tirosRestantes <= 0) {
+            perderNivel();
+        }
+    }
+
+    function ganarNivel() {
+        puedeDisparar = false;
+        const monedasGanadas = 10 * nivelActual;
+        monedasTotales += monedasGanadas;
+        juegoMonedas.textContent = `💰 ${monedasTotales}`;
+        const prog = progreso[paisActual];
+        prog.nivelesCompletados = Math.max(prog.nivelesCompletados, nivelActual);
+        if (nivelActual >= NIVELES_POR_PAIS && paisActual + 1 < paises.length) {
+            progreso[paisActual + 1].unlocked = true;
+        }
+        document.getElementById('texto-fin-nivel').textContent = `Has ganado ${monedasGanadas} monedas`;
+        document.getElementById('mensaje-fin-nivel').classList.remove('oculto');
+    }
+
+    function perderNivel() {
+        puedeDisparar = false;
+        document.getElementById('mensaje-gameover').classList.remove('oculto');
+    }
+
+    // ---- Iniciar un nivel ----
+    function iniciarNivel(paisIdx, nivel) {
+        paisActual = paisIdx;
+        nivelActual = nivel;
+        const dif = paramsDificultad();
+        tirosRestantes = Math.max(8, 25 - (nivel - 1) + dif.tirosExtra);
+        puedeDisparar = true;
+        esperandoResultado = false;
+        isDragging = false;
+
+        juegoInfo.textContent = `${paises[paisIdx].bandera} ${paises[paisIdx].nombre} Nivel ${nivel}/${NIVELES_POR_PAIS}`;
+        juegoTiros.textContent = `🔫 ${tirosRestantes}`;
+        juegoMonedas.textContent = `💰 ${monedasTotales}`;
+
+        document.getElementById('mensaje-fin-nivel').classList.add('oculto');
+        document.getElementById('mensaje-gameover').classList.add('oculto');
+
+        resizeCanvas();
+        construirMesa(BOLAS_POR_NIVEL[nivel - 1] || 15);
+        if (runner) runner.enabled = true;
+    }
+
+    // ---- Entrada táctil / mouse ----
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+        if (e.touches && e.touches.length) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+        else { clientX = e.clientX; clientY = e.clientY; }
+        return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+    }
+
+    function onPointerDown(e) {
+        e.preventDefault();
+        if (!puedeDisparar || !cueBall) return;
+        const pos = getPos(e);
+        const dx = pos.x - cueBall.position.x;
+        const dy = pos.y - cueBall.position.y;
+        if (dx * dx + dy * dy < 900) {
+            isDragging = true;
+            dragStartX = cueBall.position.x;
+            dragStartY = cueBall.position.y;
+            dragEndX = pos.x;
+            dragEndY = pos.y;
+        }
+    }
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        dragEndX = pos.x;
+        dragEndY = pos.y;
+    }
+    function onPointerUp(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        isDragging = false;
+        const dx = dragStartX - dragEndX;
+        const dy = dragStartY - dragEndY;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len > 10 && puedeDisparar) {
+            const maxLen = 80;
+            const clampedLen = Math.min(len, maxLen);
+            const ratio = clampedLen / maxLen;
+            const power = ratio * 20;
+            const angle = Math.atan2(dy, dx);
+
+            Matter.Body.setVelocity(cueBall, { x: Math.cos(angle) * power, y: Math.sin(angle) * power });
+
+            tirosRestantes--;
+            juegoTiros.textContent = `🔫 ${tirosRestantes}`;
+            puedeDisparar = false;
+            esperandoResultado = true;
+        }
+    }
+
+    canvas.addEventListener('mousedown', onPointerDown);
+    canvas.addEventListener('mousemove', onPointerMove);
+    canvas.addEventListener('mouseup', onPointerUp);
+    canvas.addEventListener('mouseleave', onPointerUp);
+    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+    canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+    canvas.addEventListener('touchend', onPointerUp, { passive: false });
+
+    // ---- Navegación entre pantallas ----
+    function mostrarPantalla(id) {
+        document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+        document.getElementById(id).classList.add('activa');
+    }
+
+    document.getElementById('btn-viaje').onclick = () => { mostrarPantalla('pantalla-mapa'); actualizarMapa(); };
+    document.getElementById('btn-volver-inicio-mapa').onclick = () => mostrarPantalla('pantalla-inicio');
+
+    document.getElementById('btn-mapa-prev').onclick = () => {
+        paisSeleccionado = (paisSeleccionado - 1 + paises.length) % paises.length;
+        actualizarMapa();
+    };
+    document.getElementById('btn-mapa-next').onclick = () => {
+        paisSeleccionado = (paisSeleccionado + 1) % paises.length;
+        actualizarMapa();
+    };
+
+    document.getElementById('btn-jugar-pais').onclick = () => {
+        if (!progreso[paisSeleccionado].unlocked) {
+            alert('🔒 Completa el país anterior para desbloquear este.');
+            return;
+        }
+        const nivelInicial = Math.min(progreso[paisSeleccionado].nivelesCompletados + 1, NIVELES_POR_PAIS);
+        mostrarPantalla('pantalla-juego');
+        const saludo = document.getElementById('mensaje-saludo');
+        document.getElementById('texto-saludo').textContent = paises[paisSeleccionado].saludo;
+        document.getElementById('pais-saludo').textContent = `${paises[paisSeleccionado].bandera} ${paises[paisSeleccionado].nombre}`;
+        saludo.classList.remove('oculto');
+        setTimeout(() => saludo.classList.add('oculto'), 1600);
+        setTimeout(() => iniciarNivel(paisSeleccionado, nivelInicial), 1700);
+    };
+
+    document.getElementById('btn-pausa').onclick = () => {
+        if (runner) runner.enabled = false;
+        mostrarPantalla('pantalla-pausa');
+    };
+    document.getElementById('btn-reanudar').onclick = () => {
+        if (runner) runner.enabled = true;
+        mostrarPantalla('pantalla-juego');
+    };
+    document.getElementById('btn-salir-pausa').onclick = () => {
+        mostrarPantalla('pantalla-inicio');
+    };
+    document.getElementById('btn-salir-juego').onclick = () => {
+        if (confirm('¿Seguro que quieres salir? Perderás el progreso de este nivel.')) {
+            if (runner) runner.enabled = false;
+            mostrarPantalla('pantalla-inicio');
+        }
+    };
+    document.getElementById('btn-reiniciar-nivel').onclick = () => {
+        if (confirm('¿Reiniciar este nivel?')) iniciarNivel(paisActual, nivelActual);
+    };
+    document.getElementById('btn-reiniciar-pais').onclick = () => {
+        if (runner) runner.enabled = true;
+        mostrarPantalla('pantalla-juego');
+        iniciarNivel(paisActual, nivelActual);
+    };
+    document.getElementById('btn-cerrar-config').onclick = () => mostrarPantalla('pantalla-inicio');
+    document.getElementById('btn-cerrar-coleccion').onclick = () => mostrarPantalla('pantalla-inicio');
+
+    document.getElementById('btn-continuar-nivel').onclick = () => {
+        document.getElementById('mensaje-fin-nivel').classList.add('oculto');
+        if (nivelActual < NIVELES_POR_PAIS) {
+            iniciarNivel(paisActual, nivelActual + 1);
+        } else {
+            alert(`🎉 ¡Completaste ${paises[paisActual].nombre}!`);
+            mostrarPantalla('pantalla-mapa');
+            paisSeleccionado = Math.min(paisActual + 1, paises.length - 1);
+            actualizarMapa();
+        }
+    };
+    document.getElementById('btn-gameover-continuar').onclick = () => {
+        document.getElementById('mensaje-gameover').classList.add('oculto');
+        iniciarNivel(paisActual, nivelActual);
+    };
+
+    document.getElementById('btn-coleccion').onclick = () => { actualizarColeccion(); mostrarPantalla('pantalla-coleccion'); };
+    document.getElementById('btn-config').onclick = () => mostrarPantalla('pantalla-config');
+    document.getElementById('config-dificultad').onchange = (e) => { dificultad = e.target.value; };
+
+    // ---- Mapa ----
+    const canvasMapa = document.getElementById('lienzo-mapa');
+    const ctxMapa = canvasMapa.getContext('2d');
+    function dibujarMapa() {
+        const w = canvasMapa.width = canvasMapa.parentElement.clientWidth;
+        const h = canvasMapa.height = canvasMapa.parentElement.clientHeight;
+        const cx = w / 2, cy = h / 2;
+        ctxMapa.clearRect(0, 0, w, h);
+
+        const bg = ctxMapa.createRadialGradient(cx, cy * 0.7, 20, cx, cy, Math.max(w, h) * 0.7);
+        bg.addColorStop(0, '#123a52');
+        bg.addColorStop(1, '#081c2c');
+        ctxMapa.fillStyle = bg;
+        ctxMapa.fillRect(0, 0, w, h);
+
+        const p = paises[paisSeleccionado];
+        const prog = progreso[paisSeleccionado];
+        const completo = prog.nivelesCompletados >= NIVELES_POR_PAIS;
+        const colorSello = !prog.unlocked ? '#5a5a5a' : (completo ? '#e8c874' : '#f3e7cd');
+        const radio = Math.min(w, h) * 0.32;
+
+        // anillo de sello estilo pasaporte (doble círculo, borde irregular con puntos)
+        ctxMapa.save();
+        ctxMapa.translate(cx, cy - 8);
+        ctxMapa.rotate(-0.05);
+        ctxMapa.strokeStyle = colorSello;
+        ctxMapa.globalAlpha = 0.85;
+        ctxMapa.lineWidth = 3;
+        ctxMapa.beginPath();
+        ctxMapa.arc(0, 0, radio, 0, Math.PI * 2);
+        ctxMapa.stroke();
+        ctxMapa.lineWidth = 1.5;
+        ctxMapa.beginPath();
+        ctxMapa.arc(0, 0, radio - 8, 0, Math.PI * 2);
+        ctxMapa.stroke();
+        // puntitos alrededor, como sello de tinta
+        const puntos = 28;
+        for (let i = 0; i < puntos; i++) {
+            const ang = (i / puntos) * Math.PI * 2;
+            ctxMapa.beginPath();
+            ctxMapa.arc(Math.cos(ang) * (radio + 6), Math.sin(ang) * (radio + 6), 1.4, 0, Math.PI * 2);
+            ctxMapa.fillStyle = colorSello;
+            ctxMapa.fill();
+        }
+        ctxMapa.globalAlpha = 1;
+        ctxMapa.font = '48px Arial';
+        ctxMapa.textAlign = 'center';
+        ctxMapa.textBaseline = 'middle';
+        ctxMapa.globalAlpha = prog.unlocked ? 1 : 0.35;
+        ctxMapa.fillText(p.bandera, 0, -6);
+        ctxMapa.globalAlpha = 1;
+
+        ctxMapa.fillStyle = colorSello;
+        ctxMapa.font = "700 13px 'Fraunces', serif";
+        ctxMapa.fillText(p.nombre.toUpperCase(), 0, radio - 22);
+        ctxMapa.restore();
+
+        if (!prog.unlocked) {
+            ctxMapa.font = '22px Arial';
+            ctxMapa.textAlign = 'center';
+            ctxMapa.fillText('🔒', cx, cy + radio - 4);
+        } else if (completo) {
+            ctxMapa.save();
+            ctxMapa.translate(cx + radio * 0.55, cy - radio * 0.45);
+            ctxMapa.rotate(0.25);
+            ctxMapa.strokeStyle = '#9c3b2c';
+            ctxMapa.fillStyle = '#9c3b2c';
+            ctxMapa.lineWidth = 2;
+            ctxMapa.strokeRect(-30, -12, 60, 24);
+            ctxMapa.font = "700 11px 'Fraunces', serif";
+            ctxMapa.textAlign = 'center';
+            ctxMapa.textBaseline = 'middle';
+            ctxMapa.fillText('COMPLETO', 0, 1);
+            ctxMapa.restore();
+        }
+    }
+
+    function actualizarMapa() {
+        const p = paises[paisSeleccionado];
+        const prog = progreso[paisSeleccionado];
+        document.getElementById('info-pais').textContent = `${p.bandera} ${p.nombre}`;
+        document.getElementById('info-nivel').textContent = prog.unlocked
+            ? `Nivel ${Math.min(prog.nivelesCompletados + 1, NIVELES_POR_PAIS)}/${NIVELES_POR_PAIS}`
+            : 'Bloqueado';
+        const totalDesbloqueados = progreso.filter(pr => pr.unlocked && pr.nivelesCompletados >= NIVELES_POR_PAIS).length;
+        document.getElementById('mapa-progreso').textContent = `🌍 ${totalDesbloqueados}/10`;
+        document.getElementById('mapa-monedas').textContent = `💰 ${monedasTotales}`;
+        const btnJugar = document.getElementById('btn-jugar-pais');
+        btnJugar.textContent = prog.unlocked ? '🎱 Jugar' : '🔒 Bloqueado';
         dibujarMapa();
-        console.log('✅ ¡Juego listo!');
+    }
+
+    function actualizarColeccion() {
+        const cont = document.getElementById('lista-coleccion');
+        cont.innerHTML = '';
+        paises.forEach((p, i) => {
+            const prog = progreso[i];
+            const div = document.createElement('div');
+            div.className = 'coleccion-item';
+            const completo = prog.nivelesCompletados >= NIVELES_POR_PAIS;
+            div.innerHTML = `<span class="${prog.unlocked ? 'desbloqueado' : 'bloqueado'}">${p.bandera} ${p.nombre}</span>
+                <span>${completo ? '⭐ Completo' : prog.unlocked ? `${prog.nivelesCompletados}/${NIVELES_POR_PAIS}` : '🔒'}</span>`;
+            cont.appendChild(div);
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        if (document.getElementById('pantalla-mapa').classList.contains('activa')) dibujarMapa();
+    });
+
+    console.log('✅ Billar Mundial listo — motor único, sin fugas de memoria.');
     </script>
 </body>
 </html>
