@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🌍 Billar Mundial</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #0a1a0f; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden;
+        }
+        #app {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 800px;
+            background: #1a3a2a;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        .pantalla {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .pantalla.activa { display: flex; }
+        h1 { font-size: 2.5rem; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
+        h2 { font-size: 1.8rem; margin-bottom: 15px; }
+        .boton {
+            background: #f5c842;
+            color: #1a3a2a;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            margin: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #b38a2a;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+        .boton:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #b38a2a;
+        }
+        .boton-secundario {
+            background: #2a5a3a;
+            color: white;
+            box-shadow: 0 5px 0 #1a3a2a;
+        }
+        .barra-superior {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            margin-bottom: 10px;
+        }
+        .mapa-container {
+            width: 100%;
+            height: 70%;
+            position: relative;
+            border-radius: 20px;
+            background: #1a4a6a;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        #lienzo-mapa {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .info-viaje {
+            background: rgba(0,0,0,0.6);
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .saludo-bienvenida {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #f5c842;
+            text-shadow: 0 0 30px rgba(245,200,66,0.8);
+            animation: latido 1s infinite alternate;
+        }
+        @keyframes latido {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+        #canvas-juego {
+            width: 100%;
+            height: 70%;
+            background: #1a5a2a;
+            border-radius: 20px;
+            touch-action: none;
+        }
+        .oculto { display: none !important; }
+        .mensaje-flotante {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 30px 50px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 10;
+            border: 3px solid #f5c842;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="pantalla-inicio" class="pantalla activa">
+            <h1>🌍 BILLAR MUNDIAL</h1>
+            <p style="margin-bottom:30px; opacity:0.8;">Viaja por 10 países</p>
+            <button class="boton" id="btn-viaje">✈️ Viaje Mundial</button>
+            <button class="boton boton-secundario" id="btn-rapida">🎱 Partida Rápida</button>
+            <button class="boton boton-secundario" id="btn-2jugadores">👥 2 Jugadores</button>
+            <button class="boton boton-secundario" id="btn-coleccion">🏆 Colección</button>
+            <button class="boton boton-secundario" id="btn-config">⚙️ Configuración</button>
+        </div>
+        <div id="pantalla-mapa" class="pantalla">
+            <div class="barra-superior">
+                <span id="mapa-progreso">🌍 0/10</span>
+                <span id="mapa-monedas">💰 0</span>
+                <button id="btn-volver-inicio" style="background:none; border:none; color:white; font-size:1.5rem;">✕</button>
+            </div>
+            <div class="mapa-container">
+                <canvas id="lienzo-mapa"></canvas>
+            </div>
+            <div class="info-viaje">
+                <p id="info-pais">🇲🇽 México</p>
+                <p id="info-nivel">Nivel 1/10</p>
+            </div>
+            <button class="boton" id="btn-jugar-pais">🎱 Jugar</button>
+        </div>
+        <div id="pantalla-juego" class="pantalla">
+            <div class="barra-superior">
+                <span id="juego-info">🇲🇽 Nivel 1</span>
+                <span id="juego-tiros">🔫 25</span>
+                <span id="juego-monedas">💰 0</span>
+                <button id="btn-pausa" style="background:none; border:none; color:white; font-size:1.5rem;">⏸</button>
+            </div>
+            <canvas id="canvas-juego"></canvas>
+            <div style="display:flex; width:100%; justify-content:space-between; padding:10px;">
+                <button class="boton" id="btn-disparar" style="width:45%; padding:10px;">🎯 Disparar</button>
+                <button class="boton boton-secundario" id="btn-reiniciar" style="width:45%; padding:10px;">🔄 Reiniciar</button>
+            </div>
+            <div id="mensaje-saludo" class="mensaje-flotante oculto">
+                <div id="texto-saludo" class="saludo-bienvenida">¡HOLA!</div>
+                <p id="pais-saludo" style="margin-top:10px;">🇲🇽 México</p>
+            </div>
+        </div>
+        <div id="pantalla-pausa" class="pantalla">
+            <h2>⏸ Pausa</h2>
+            <button class="boton" id="btn-reanudar">▶️ Reanudar</button>
+            <button class="boton boton-secundario" id="btn-reiniciar-pais">🔄 Reiniciar País</button>
+            <button class="boton boton-secundario" id="btn-salir">🚪 Salir</button>
+        </div>
+        <div id="pantalla-config" class="pantalla">
+            <h2>⚙️ Configuración</h2>
+            <div style="display:flex; flex-direction:column; gap:15px; width:80%;">
+                <label>🎵 Música: <input type="checkbox" checked></label>
+                <label>🔊 Efectos: <input type="checkbox" checked></label>
+                <label>🗣️ Voz: <input type="checkbox" checked></label>
+                <label>🎯 Dificultad:
+                    <select><option>Fácil</option><option selected>Medio</option><option>Difícil</option></select>
+                </label>
+            </div>
+            <button class="boton boton-secundario" id="btn-cerrar-config">⬅️ Cerrar</button>
+        </div>
+        <div id="pantalla-coleccion" class="pantalla">
+            <h2>🏆 Colección</h2>
+            <div style="width:90%; max-height:60%; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:15px; padding:15px;">
+                <p>Completa países para desbloquear</p>
+            </div>
+            <button class="boton boton-secundario" id="btn-cerrar-coleccion">⬅️ Cerrar</button>
+        </div>
+    </div>
+    <script>
+        function mostrarPantalla(id) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(id).classList.add('activa');
+        }
+        document.getElementById('btn-viaje').onclick = () => mostrarPantalla('pantalla-mapa');
+        document.getElementById('btn-volver-inicio').onclick = () => mostrarPantalla('pantalla-inicio');
+        document.getElementById('btn-jugar-pais').onclick = () => {
+            mostrarPantalla('pantalla-juego');
+            const saludo = document.getElementById('mensaje-saludo');
+            document.getElementById('texto-saludo').textContent = '¡HOLA!';
+            document.getElementById('pais-saludo').textContent = '🇲🇽 México';
+            saludo.classList.remove('oculto');
+            setTimeout(() => saludo.classList.add('oculto'), 2500);
+        };
+        document.getElementById('btn-pausa').onclick = () => mostrarPantalla('pantalla-pausa');
+        document.getElementById('btn-reanudar').onclick = () => mostrarPantalla('pantalla-juego');
+        document.getElementById('btn-salir').onclick = () => mostrarPantalla('pantalla-inicio');
+        document.getElementById('btn-cerrar-config').onclick = () => mostrarPantalla('pantalla-inicio');
+        document.getElementById('btn-cerrar-coleccion').onclick = () => mostrarPantalla('pantalla-inicio');
+        document.getElementById('btn-reiniciar-pais').onclick = () => {
+            if(confirm('¿Reiniciar país?')) {
+                alert('País reiniciado');
+                mostrarPantalla('pantalla-mapa');
+            }
+        };
+        document.getElementById('btn-rapida').onclick = () => alert('🎱 Próximamente');
+        document.getElementById('btn-2jugadores').onclick = () => alert('👥 Próximamente');
+        document.getElementById('btn-coleccion').onclick = () => mostrarPantalla('pantalla-coleccion');
+        document.getElementById('btn-config').onclick = () => mostrarPantalla('pantalla-config');
+        document.getElementById('btn-disparar').onclick = () => alert('🎯 ¡Disparo!');
+        document.getElementById('btn-reiniciar').onclick = () => {
+            if(confirm('¿Reiniciar nivel?')) alert('🔄 Reiniciado');
+        };
+        const canvas = document.getElementById('lienzo-mapa');
+        const ctx = canvas.getContext('2d');
+        function dibujarMapa() {
+            const w = canvas.width = canvas.parentElement.clientWidth;
+            const h = canvas.height = canvas.parentElement.clientHeight;
+            ctx.fillStyle = '#0a2a4a';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = '#f5c842';
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🇲🇽', w/2, h/2 - 20);
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.fillText('México', w/2, h/2 + 40);
+            ctx.font = '30px Arial';
+            ctx.fillText('✈️', w/2 - 60, h/2 - 30);
+        }
+        window.onresize = dibujarMapa;
+        dibujarMapa();
+        console.log('✅ ¡Juego listo!');
+    </script>
+</body>
+</html>
