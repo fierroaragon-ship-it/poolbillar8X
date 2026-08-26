@@ -195,16 +195,79 @@
         #info-nivel { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
         .saludo-bienvenida { font-size: 2.8rem; font-weight: 900; font-family: 'Fraunces', serif; color: var(--gold-bright); text-shadow: 0 0 30px rgba(232,200,116,0.8); animation: latido 1s infinite alternate; }
         @keyframes latido { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
-        #canvas-juego {
-            width: 100%;
-            height: 66%;
-            background: var(--felt-deep);
-            border-radius: 10px;
-            touch-action: none;
-            cursor: pointer;
-            border: 14px solid var(--wood);
-            box-shadow: 0 0 0 2px var(--wood-light), inset 0 0 25px rgba(0,0,0,0.55);
+        #app.modo-juego { max-width: 100vw; max-height: 100vh; border-radius: 0; box-shadow: none; }
+        #pantalla-juego { padding: 7px 10px 8px; justify-content: flex-start; }
+        #pantalla-juego .barra-superior { flex: 0 0 auto; margin-bottom: 5px; padding: 6px 14px; }
+        .zona-mesa {
+            position: relative; width: 100%; flex: 1 1 auto; min-height: 0;
+            display: flex; align-items: center; justify-content: center; padding-right: 58px;
         }
+        #canvas-juego {
+            display: block; width: min(100%, calc((100vh - 112px) * 2)); height: auto;
+            max-height: calc(100vh - 112px); aspect-ratio: 2 / 1;
+            background: #071b15; border-radius: 13px;
+            touch-action: none; cursor: crosshair;
+            filter: drop-shadow(0 10px 13px rgba(0,0,0,0.55));
+        }
+        .barra-potencia {
+            --power: 0;
+            position: absolute; right: 3px;
+            top: 50%; transform: translateY(-50%); z-index: 4;
+            width: 52px; height: min(74%, 270px); min-height: 140px;
+            border: 1px solid rgba(232,200,116,0.55); border-radius: 16px;
+            background: linear-gradient(90deg, rgba(26,13,8,0.96), rgba(86,49,25,0.96), rgba(25,12,7,0.96));
+            box-shadow: inset 0 0 9px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.45);
+            touch-action: none; cursor: ns-resize; user-select: none; -webkit-user-select: none; overscroll-behavior: contain;
+        }
+        .barra-potencia::before { content: ''; position: absolute; inset: -10px -3px; }
+        .potencia-titulo {
+            position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+            color: var(--gold-bright); font-weight: 800; font-size: 0.55rem; letter-spacing: 0.1em;
+        }
+        .potencia-canal { position: absolute; inset: 10px 13px; border-radius: 8px; background: #0a1511; box-shadow: inset 0 0 4px #000; }
+        .potencia-carga {
+            position: absolute; left: 0; right: 0; top: 0; height: calc(var(--power) * 100%);
+            border-radius: 8px; background: linear-gradient(#f6d676, #d8792f 60%, #a82f24);
+            box-shadow: 0 0 8px rgba(232,200,116,0.55);
+        }
+        .potencia-tirador {
+            position: absolute; left: 50%; top: calc(10px + var(--power) * (100% - 20px));
+            width: 32px; height: 18px; transform: translate(-50%, -50%);
+            border-radius: 5px; border: 1px solid #f0d28a;
+            background: linear-gradient(#f4dfaa, #a87731 48%, #5a351c 52%, #2d190e);
+            box-shadow: 0 2px 7px #000; transition: top 80ms linear;
+        }
+        .potencia-valor {
+            position: absolute; left: 50%; bottom: -19px; transform: translateX(-50%);
+            min-width: 34px; text-align: center; color: var(--gold-bright);
+            font: 800 0.62rem 'Inter', sans-serif; text-shadow: 0 1px 3px #000;
+        }
+        .barra-potencia.cargando .potencia-tirador { transition: none; }
+        .barra-potencia.retorno .potencia-tirador { transition: top 180ms cubic-bezier(.2,.9,.2,1); }
+        .hud-inferior {
+            width: 100%; flex: 0 0 auto; display: grid; grid-template-columns: 96px 1fr 1fr;
+            align-items: center; gap: 8px; padding-top: 5px;
+        }
+        .selector-impacto { display: flex; align-items: center; gap: 6px; color: var(--parchment-dim); font-size: 0.58rem; font-weight: 700; }
+        #bola-impacto {
+            position: relative; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 50%;
+            background: radial-gradient(circle at 34% 28%, #fff 0 12%, #f5f1e5 30%, #bbb7aa 100%);
+            border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 3px 7px rgba(0,0,0,0.45);
+            touch-action: none; cursor: crosshair;
+        }
+        #punto-impacto { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: #b22f28; transform: translate(-50%,-50%); box-shadow: 0 0 0 2px rgba(255,255,255,0.65); }
+        .hud-inferior .boton { width: 100%; max-width: none; padding: 8px 10px; margin: 0; font-size: 0.72rem; }
+        .aviso-orientacion {
+            display: none; position: absolute; inset: 0; z-index: 45; align-items: center; justify-content: center;
+            background: radial-gradient(circle at 50% 42%, rgba(18,67,51,0.98), rgba(5,18,13,0.99));
+            text-align: center; padding: 28px;
+        }
+        .aviso-orientacion-contenido { max-width: 260px; color: var(--parchment); }
+        .icono-girar { display: block; font-size: 3.2rem; margin-bottom: 12px; animation: sugerirGiro 1.8s ease-in-out infinite; }
+        .aviso-orientacion strong { display: block; font-family: 'Fraunces', serif; color: var(--gold-bright); font-size: 1.25rem; margin-bottom: 5px; }
+        .aviso-orientacion small { opacity: 0.72; line-height: 1.4; }
+        @keyframes sugerirGiro { 0%,100% { transform: rotate(0); } 50% { transform: rotate(90deg); } }
+        @media (orientation: portrait) { #pantalla-juego.activa .aviso-orientacion { display: flex; } }
         .oculto { display: none !important; }
         .mensaje-flotante {
             position: absolute;
@@ -309,10 +372,22 @@
                 <span id="juego-monedas">💰 0</span>
                 <button id="btn-pausa" style="background:none; border:none; color:white; font-size:1.5rem;">⏸</button>
             </div>
-            <canvas id="canvas-juego"></canvas>
-            <div class="controles-juego">
-                <button class="boton" id="btn-reiniciar-nivel" style="width:45%; padding:10px;">🔄 Reiniciar</button>
-                <button class="boton boton-secundario" id="btn-salir-juego" style="width:45%; padding:10px;">🚪 Salir</button>
+            <div class="zona-mesa">
+                <canvas id="canvas-juego" width="960" height="480" aria-label="Mesa de Billar Mundial"></canvas>
+                <div id="barra-potencia" class="barra-potencia" role="slider" aria-label="Potencia del tiro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+                    <span class="potencia-titulo">POTENCIA</span>
+                    <div class="potencia-canal"><div class="potencia-carga"></div></div>
+                    <div class="potencia-tirador"></div>
+                    <output id="potencia-valor" class="potencia-valor">0%</output>
+                </div>
+            </div>
+            <div class="hud-inferior">
+                <div class="selector-impacto"><div id="bola-impacto" aria-label="Punto de impacto futuro"><span id="punto-impacto"></span></div><span>EFECTO<br>PRÓXIMAMENTE</span></div>
+                <button class="boton" id="btn-reiniciar-nivel">🔄 Reiniciar</button>
+                <button class="boton boton-secundario" id="btn-salir-juego">🚪 Salir</button>
+            </div>
+            <div class="aviso-orientacion" aria-live="polite">
+                <div class="aviso-orientacion-contenido"><span class="icono-girar">📱</span><strong>Gira tu dispositivo</strong><small>La partida continúa intacta. Billar Mundial se disfruta en horizontal.</small></div>
             </div>
             <div id="mensaje-fin-nivel" class="mensaje-flotante oculto">
                 <h2>Nivel completado</h2>
@@ -415,30 +490,42 @@
     const juegoInfo = document.getElementById('juego-info');
     const juegoTiros = document.getElementById('juego-tiros');
     const juegoMonedas = document.getElementById('juego-monedas');
+    const barraPotencia = document.getElementById('barra-potencia');
+    const potenciaValor = document.getElementById('potencia-valor');
+    const bolaImpacto = document.getElementById('bola-impacto');
+    const puntoImpacto = document.getElementById('punto-impacto');
+
+    const MESA_W = 960;
+    const MESA_H = 480;
+    const LIMITE = { izquierda: 56, derecha: 904, arriba: 28, abajo: 452 };
+    const RADIO_BOLA = 11;
 
     // ---- Matter.js (creados UNA sola vez) ----
     let engine = null, world = null, runner = null;
     let cueBall = null;
     let ballsArr = []; // { body, isPocketed }
     let walls = [], pockets = [];
+    let prediccionActiva = null;
+    let medicionColision = null;
+    let ultimoErrorAngular = null;
     let cueStartPos = { x: 0, y: 0 };
-    const COLORES = ['#f5c842','#1a5a8a','#c0392b','#8e44ad','#e67e22',
-        '#2ecc71','#e74c3c','#f1c40f','#3498db','#9b59b6',
-        '#1abc9c','#27ae60','#d35400','#2980b9','#c0392b'];
+    const COLORES_BILLAR = ['#e4b628','#205ba5','#c33b32','#683d91','#df7624','#278453','#7b2729','#17191b'];
 
-    let isDragging = false;
-    let dragStartX = 0, dragStartY = 0, dragEndX = 0, dragEndY = 0;
-    let golpeAnim = null; // { angle, t0 } animación del taco al soltar
+    let apuntando = false;
+    let direccionTiro = { x: -1, y: 0 };
+    let cargandoPotencia = false;
+    let potenciaTiro = 0;
+    let golpeAnim = null;
+    let puntoEfecto = { x: 0, y: 0 };
 
     function resizeCanvas() {
-        const container = canvas.parentElement;
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
+        // El mundo usa coordenadas lógicas fijas; CSS adapta su tamaño sin reiniciar física.
+        if (canvas.width !== MESA_W) canvas.width = MESA_W;
+        if (canvas.height !== MESA_H) canvas.height = MESA_H;
     }
     window.addEventListener('resize', () => {
         if (document.getElementById('pantalla-juego').classList.contains('activa')) {
-            resizeCanvas();
-            construirMesa(BOLAS_POR_NIVEL[nivelActual - 1] || 15);
+            draw();
         }
     });
 
@@ -453,6 +540,10 @@
             event.pairs.forEach(pair => {
                 let pocket = null, ball = null, isCue = false;
                 const a = pair.bodyA, b = pair.bodyB;
+                const objetivoImpactado = a === cueBall && b.label === 'ball' ? b : (b === cueBall && a.label === 'ball' ? a : null);
+                if (objetivoImpactado && prediccionActiva && objetivoImpactado === prediccionActiva.objetivo && !medicionColision) {
+                    medicionColision = { objetivo: objetivoImpactado, normal: prediccionActiva.normal };
+                }
                 if (a.label === 'pocket' && (b.label === 'ball' || b.label === 'cueBall')) { pocket = a; ball = b; isCue = b.label === 'cueBall'; }
                 else if (b.label === 'pocket' && (a.label === 'ball' || a.label === 'cueBall')) { pocket = b; ball = a; isCue = a.label === 'cueBall'; }
                 if (!pocket || !ball) return;
@@ -469,6 +560,18 @@
                     if (entry) entry.isPocketed = true;
                 }
             });
+        });
+
+        Matter.Events.on(engine, 'afterUpdate', () => {
+            if (!medicionColision) return;
+            const velocidad = medicionColision.objetivo.velocity;
+            const rapidez = Math.hypot(velocidad.x, velocidad.y);
+            if (rapidez < 0.001) return;
+            const coseno = Math.max(-1, Math.min(1, (velocidad.x * medicionColision.normal.x + velocidad.y * medicionColision.normal.y) / rapidez));
+            ultimoErrorAngular = Math.acos(coseno) * 180 / Math.PI;
+            console.info(`Trayectoria medida: error angular ${ultimoErrorAngular.toFixed(3)}°`);
+            medicionColision = null;
+            prediccionActiva = null;
         });
     }
 
@@ -493,243 +596,342 @@
         // limpia todo lo anterior sin destruir motor/runner
         Matter.Composite.clear(world, false);
         walls = []; pockets = []; ballsArr = [];
+        prediccionActiva = null; medicionColision = null; ultimoErrorAngular = null;
 
-        const w = canvas.width, h = canvas.height;
-        const margin = 30;
-        const radioBola = 8;
+        const w = MESA_W, h = MESA_H;
         const dif = paramsDificultad();
 
-        const wallOptions = { isStatic: true, friction: 0.3, restitution: 0.85 };
+        const wallOptions = { isStatic: true, friction: 0.18, restitution: 0.88, label: 'rail' };
+        const recta = (x1, y1, x2, y2, grosor = 10) => {
+            const largo = Math.hypot(x2 - x1, y2 - y1);
+            const cuerpo = Matter.Bodies.rectangle((x1 + x2) / 2, (y1 + y2) / 2, largo, grosor, {
+                ...wallOptions, angle: Math.atan2(y2 - y1, x2 - x1)
+            });
+            cuerpo.plugin = { guia: { largo, grosor } };
+            return cuerpo;
+        };
+        // Bandas segmentadas: las aberturas reales permiten entrar a las seis troneras.
         walls = [
-            Matter.Bodies.rectangle(w / 2, margin, w - margin * 2, 5, wallOptions),
-            Matter.Bodies.rectangle(w / 2, h - margin, w - margin * 2, 5, wallOptions),
-            Matter.Bodies.rectangle(margin, h / 2, 5, h - margin * 2, wallOptions),
-            Matter.Bodies.rectangle(w - margin, h / 2, 5, h - margin * 2, wallOptions)
+            recta(87, LIMITE.arriba, 444, LIMITE.arriba), recta(516, LIMITE.arriba, 873, LIMITE.arriba),
+            recta(87, LIMITE.abajo, 444, LIMITE.abajo), recta(516, LIMITE.abajo, 873, LIMITE.abajo),
+            recta(LIMITE.izquierda, 67, LIMITE.izquierda, 413), recta(LIMITE.derecha, 67, LIMITE.derecha, 413),
+            recta(70, 46, 87, 58, 9), recta(873, 58, 890, 46, 9),
+            recta(70, 434, 87, 422, 9), recta(873, 422, 890, 434, 9),
+            recta(444, 35, 458, 46, 8), recta(502, 46, 516, 35, 8),
+            recta(444, 445, 458, 434, 8), recta(502, 434, 516, 445, 8)
         ];
         Matter.Composite.add(world, walls);
 
-        const pocketRadius = 16 * dif.pocketMult;
+        const pocketRadius = 22 * dif.pocketMult;
         const pocketPositions = [
-            { x: margin, y: margin }, { x: w / 2, y: margin - 5 }, { x: w - margin, y: margin },
-            { x: margin, y: h - margin }, { x: w / 2, y: h - margin + 5 }, { x: w - margin, y: h - margin }
+            { x: 56, y: 28 }, { x: w / 2, y: 24 }, { x: 904, y: 28 },
+            { x: 56, y: 452 }, { x: w / 2, y: 456 }, { x: 904, y: 452 }
         ];
         pockets = pocketPositions.map(pos => Matter.Bodies.circle(pos.x, pos.y, pocketRadius, { isStatic: true, isSensor: true, label: 'pocket' }));
         Matter.Composite.add(world, pockets);
 
-        cueStartPos = { x: w / 2, y: h - margin - 60 };
-        cueBall = Matter.Bodies.circle(cueStartPos.x, cueStartPos.y, radioBola, { restitution: 0.9, friction: 0.05, frictionAir: 0.012, label: 'cueBall' });
+        cueStartPos = { x: 255, y: h / 2 };
+        cueBall = Matter.Bodies.circle(cueStartPos.x, cueStartPos.y, RADIO_BOLA, { restitution: 0.9, friction: 0.045, frictionAir: 0.012, label: 'cueBall' });
         Matter.Composite.add(world, cueBall);
 
-        const spacing = radioBola * 2 + 2;
-        const rackPos = generarPosicionesRack(numBolas, w / 2 - 80, h / 2 - 20, spacing);
+        const rackCompleto = generarPosicionesRack(15, 650, h / 2, RADIO_BOLA * 2 + 1.5);
+        const ordenRack = [1, 9, 2, 10, 8, 3, 11, 4, 12, 5, 6, 13, 7, 14, 15];
+        const rackPos = rackCompleto.slice(0, Math.min(numBolas, 15));
         rackPos.forEach((p, i) => {
-            const body = Matter.Bodies.circle(p.x, p.y, radioBola, {
+            const body = Matter.Bodies.circle(p.x, p.y, RADIO_BOLA, {
                 restitution: 0.9, friction: 0.05, frictionAir: 0.012, label: 'ball'
             });
-            body.plugin = { isPocketed: false, colorIndex: i };
+            body.plugin = { isPocketed: false, numero: ordenRack[i] };
             Matter.Composite.add(world, body);
             ballsArr.push({ body, isPocketed: false });
         });
+        direccionTiro = { x: 1, y: 0 };
+        potenciaTiro = 0;
+        actualizarBarraPotencia(0);
     }
 
     // ---- Dibujo ----
-    function dibujarBola(x, y, colorPrincipal, esBlanca, numero) {
-        const r = 8;
-        // sombra de contacto
+    function dibujarBola(x, y, numero = 0) {
+        const r = RADIO_BOLA;
+        const esBlanca = numero === 0;
+        const esRayada = numero > 8;
+        const indiceColor = numero === 8 ? 7 : ((numero - 1) % 8);
+        const colorPrincipal = esBlanca ? '#f5f1df' : COLORES_BILLAR[indiceColor];
         ctx.beginPath();
-        ctx.ellipse(x, y + r * 0.75, r * 0.85, r * 0.32, 0, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.ellipse(x + 1.8, y + r * 0.82, r * 0.92, r * 0.34, -0.08, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.42)';
         ctx.fill();
 
-        // cuerpo con degradado esférico
-        const grd = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.15, x, y, r * 1.15);
-        if (esBlanca) {
-            grd.addColorStop(0, '#ffffff');
-            grd.addColorStop(1, '#d8d8d8');
-        } else {
-            grd.addColorStop(0, colorPrincipal + 'ff');
-            grd.addColorStop(0.55, colorPrincipal);
-            grd.addColorStop(1, 'rgba(0,0,0,0.55)');
-        }
+        const grd = ctx.createRadialGradient(x - r * 0.38, y - r * 0.44, r * 0.08, x + r * 0.1, y + r * 0.14, r * 1.12);
+        grd.addColorStop(0, esBlanca ? '#ffffff' : '#fff4d5');
+        grd.addColorStop(esBlanca ? 0.32 : 0.16, colorPrincipal);
+        grd.addColorStop(0.72, colorPrincipal);
+        grd.addColorStop(1, esBlanca ? '#aaa89f' : '#111716');
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fillStyle = grd;
-        ctx.fill();
-        ctx.lineWidth = 0.7;
-        ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-        ctx.stroke();
+        ctx.fillStyle = grd; ctx.fill();
+        ctx.lineWidth = 0.8; ctx.strokeStyle = 'rgba(8,12,11,0.7)'; ctx.stroke();
+
+        if (esRayada) {
+            ctx.save();
+            ctx.beginPath(); ctx.arc(x, y, r - 0.7, 0, Math.PI * 2); ctx.clip();
+            const franja = ctx.createLinearGradient(x, y - r * 0.62, x, y + r * 0.62);
+            franja.addColorStop(0, colorPrincipal); franja.addColorStop(0.18, colorPrincipal);
+            franja.addColorStop(0.21, '#f4efe0'); franja.addColorStop(0.79, '#f4efe0');
+            franja.addColorStop(0.82, colorPrincipal); franja.addColorStop(1, colorPrincipal);
+            ctx.fillStyle = franja; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+            ctx.restore();
+        }
 
         if (!esBlanca) {
             ctx.beginPath();
-            ctx.arc(x, y, r * 0.62, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,255,255,0.92)';
-            ctx.fill();
-            ctx.fillStyle = colorPrincipal;
-            ctx.font = 'bold 6.5px Inter, Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(String(numero), x, y + 0.5);
+            ctx.arc(x, y, r * 0.47, 0, Math.PI * 2);
+            ctx.fillStyle = '#f8f4e8'; ctx.fill();
+            ctx.fillStyle = '#171a19'; ctx.font = '800 7.5px Inter, Arial';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(numero), x, y + 0.4);
         }
 
-        // brillo especular
         ctx.beginPath();
-        ctx.arc(x - r * 0.35, y - r * 0.42, r * 0.28, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.75)';
-        ctx.fill();
+        ctx.ellipse(x - r * 0.37, y - r * 0.43, r * 0.25, r * 0.16, -0.6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.78)'; ctx.fill();
     }
 
     // ---- Taco de billar ----
     function dibujarTaco() {
-        if (!cueBall) return;
+        if (!cueBall || (!puedeDisparar && !golpeAnim)) return;
         const cx = cueBall.position.x, cy = cueBall.position.y;
-        let angulo, retroceso;
-
-        if (isDragging) {
-            const dx = dragStartX - dragEndX;
-            const dy = dragStartY - dragEndY;
-            const len = Math.sqrt(dx * dx + dy * dy);
-            if (len < 2) return;
-            angulo = Math.atan2(dy, dx); // dirección del taco = opuesta al tiro
-            const maxLen = 80;
-            retroceso = 14 + Math.min(len, maxLen) * 0.6;
-        } else if (golpeAnim) {
-            const t = (performance.now() - golpeAnim.t0) / 160; // 0..1
-            if (t >= 1) { golpeAnim = null; return; }
-            angulo = golpeAnim.angle;
-            // el taco "empuja" hacia la bola y luego se retira
-            retroceso = 14 + (t < 0.35 ? (0.35 - t) / 0.35 * -30 : (t - 0.35) / 0.65 * 40);
-        } else {
-            return; // sin taco visible en reposo (como en billar real, se toma antes de tirar)
+        let retroceso = 18 + potenciaTiro * 62;
+        if (golpeAnim) {
+            const t = Math.min(1, (performance.now() - golpeAnim.t0) / 300);
+            if (t < 0.42) retroceso = golpeAnim.retroceso * (1 - t / 0.42) + 2 * (t / 0.42);
+            else retroceso = 2 + 18 * ((t - 0.42) / 0.58);
+            if (t >= 1) golpeAnim = null;
         }
 
-        const dirX = Math.cos(angulo), dirY = Math.sin(angulo);
-        const tacoLargo = 130;
-        const x1 = cx + dirX * retroceso;
-        const y1 = cy + dirY * retroceso;
-        const x2 = x1 + dirX * tacoLargo;
-        const y2 = y1 + dirY * tacoLargo;
+        const dirX = direccionTiro.x, dirY = direccionTiro.y;
+        const x1 = cx - dirX * retroceso, y1 = cy - dirY * retroceso;
+        const x2 = x1 - dirX * 245, y2 = y1 - dirY * 245;
 
         ctx.save();
-        // sombra del taco
         ctx.beginPath();
-        ctx.moveTo(x1, y1 + 3);
-        ctx.lineTo(x2, y2 + 3);
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-        ctx.lineWidth = 5;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        // cuerpo del taco: degradado madera clara -> oscura, punta clara
+        ctx.moveTo(x1 + 2, y1 + 4); ctx.lineTo(x2 + 2, y2 + 4);
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
         const grad = ctx.createLinearGradient(x1, y1, x2, y2);
-        grad.addColorStop(0, '#e8c874');
-        grad.addColorStop(0.15, '#c9a24a');
-        grad.addColorStop(1, '#3f2415');
+        grad.addColorStop(0, '#f2d9a0'); grad.addColorStop(0.5, '#c28a43');
+        grad.addColorStop(0.72, '#6a341d'); grad.addColorStop(1, '#24120c');
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 4.5;
-        ctx.lineCap = 'round';
-        ctx.stroke();
+        ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+        ctx.strokeStyle = grad; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.stroke();
+        const collarX = x1 - dirX * 14, collarY = y1 - dirY * 14;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(collarX, collarY);
+        ctx.strokeStyle = '#f1e8d5'; ctx.lineWidth = 6; ctx.stroke();
+        ctx.beginPath(); ctx.arc(x1, y1, 3.2, 0, Math.PI * 2); ctx.fillStyle = '#2d78a2'; ctx.fill();
+        const wrapA = { x: x1 - dirX * 160, y: y1 - dirY * 160 };
+        const wrapB = { x: x1 - dirX * 216, y: y1 - dirY * 216 };
+        ctx.beginPath(); ctx.moveTo(wrapA.x, wrapA.y); ctx.lineTo(wrapB.x, wrapB.y);
+        ctx.strokeStyle = '#2b211c'; ctx.lineWidth = 8; ctx.stroke();
+        ctx.setLineDash([2, 3]); ctx.strokeStyle = 'rgba(232,200,116,0.5)'; ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+        ctx.restore();
+    }
 
-        // puntera azul (tip)
-        ctx.beginPath();
-        ctx.arc(x1, y1, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#3a6fa8';
-        ctx.fill();
+    function interseccionRayoCirculo(origen, direccion, centro, radio) {
+        const rx = centro.x - origen.x, ry = centro.y - origen.y;
+        const proyeccion = rx * direccion.x + ry * direccion.y;
+        const lateral2 = rx * rx + ry * ry - proyeccion * proyeccion;
+        const discriminante = radio * radio - lateral2;
+        if (discriminante < 0) return Infinity;
+        const raiz = Math.sqrt(Math.max(0, discriminante));
+        const entrada = proyeccion - raiz;
+        if (entrada > 0.001) return entrada;
+        const salida = proyeccion + raiz;
+        return salida > 0.001 ? salida : Infinity;
+    }
+
+    function interseccionRayoBanda(origen, direccion, banda, radio) {
+        const datos = banda.plugin && banda.plugin.guia;
+        if (!datos) return Infinity;
+        const cos = Math.cos(-banda.angle), sin = Math.sin(-banda.angle);
+        const ox = origen.x - banda.position.x, oy = origen.y - banda.position.y;
+        const localO = { x: ox * cos - oy * sin, y: ox * sin + oy * cos };
+        const localD = { x: direccion.x * cos - direccion.y * sin, y: direccion.x * sin + direccion.y * cos };
+        const mitadX = datos.largo / 2 + radio, mitadY = datos.grosor / 2 + radio;
+        let entrada = -Infinity, salida = Infinity;
+        for (const eje of ['x', 'y']) {
+            const limite = eje === 'x' ? mitadX : mitadY;
+            if (Math.abs(localD[eje]) < 1e-9) {
+                if (Math.abs(localO[eje]) > limite) return Infinity;
+                continue;
+            }
+            let t1 = (-limite - localO[eje]) / localD[eje];
+            let t2 = (limite - localO[eje]) / localD[eje];
+            if (t1 > t2) [t1, t2] = [t2, t1];
+            entrada = Math.max(entrada, t1); salida = Math.min(salida, t2);
+            if (entrada > salida) return Infinity;
+        }
+        return entrada > 0.001 ? entrada : Infinity;
+    }
+
+    function primerLimiteFisico(origen, direccion, radio) {
+        let mejor = { distancia: Infinity, tipo: null };
+        walls.forEach(banda => {
+            const distancia = interseccionRayoBanda(origen, direccion, banda, radio);
+            if (distancia < mejor.distancia) mejor = { distancia, tipo: 'banda' };
+        });
+        pockets.forEach(tronera => {
+            const distancia = interseccionRayoCirculo(origen, direccion, tronera.position, tronera.circleRadius + radio);
+            if (distancia < mejor.distancia) mejor = { distancia, tipo: 'tronera' };
+        });
+        return mejor;
+    }
+
+    function contactoCircular(origen, direccion, radioBlanca, objetivo) {
+        const sumaRadios = radioBlanca + objetivo.circleRadius;
+        const distancia = interseccionRayoCirculo(origen, direccion, objetivo.position, sumaRadios);
+        if (!Number.isFinite(distancia)) return null;
+        const fantasma = { x: origen.x + direccion.x * distancia, y: origen.y + direccion.y * distancia };
+        const nx = objetivo.position.x - fantasma.x, ny = objetivo.position.y - fantasma.y;
+        const longitudNormal = Math.hypot(nx, ny);
+        if (Math.abs(longitudNormal - sumaRadios) > 0.01) return null;
+        const normal = { x: nx / longitudNormal, y: ny / longitudNormal };
+        const componenteNormal = direccion.x * normal.x + direccion.y * normal.y;
+        const tangencial = {
+            x: direccion.x - normal.x * componenteNormal,
+            y: direccion.y - normal.y * componenteNormal
+        };
+        return { distancia, fantasma, sumaRadios, normal, componenteNormal, tangencial };
+    }
+
+    function calcularGuia() {
+        if (!cueBall) return null;
+        const origen = cueBall.position;
+        const radioBlanca = cueBall.circleRadius;
+        let primerContacto = null;
+        let objetivo = null;
+        ballsArr.forEach(entry => {
+            if (entry.isPocketed) return;
+            const contacto = contactoCircular(origen, direccionTiro, radioBlanca, entry.body);
+            if (contacto && (!primerContacto || contacto.distancia < primerContacto.distancia)) {
+                primerContacto = contacto; objetivo = entry.body;
+            }
+        });
+        const limite = primerLimiteFisico(origen, direccionTiro, radioBlanca);
+        if (!primerContacto || limite.distancia < primerContacto.distancia) {
+            const distancia = Number.isFinite(limite.distancia) ? limite.distancia : 900;
+            return { fin: { x: origen.x + direccionTiro.x * distancia, y: origen.y + direccionTiro.y * distancia }, objetivo: null, limite: limite.tipo };
+        }
+        return { fin: primerContacto.fantasma, objetivo, ...primerContacto, aproximada: potenciaTiro >= 0.72 };
+    }
+
+    function dibujarGuia() {
+        if (!cueBall || !puedeDisparar || !todasQuietas()) return;
+        const guia = calcularGuia();
+        if (!guia) return;
+        ctx.save();
+        ctx.setLineDash([7, 6]); ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(255,255,255,0.86)';
+        ctx.beginPath(); ctx.moveTo(cueBall.position.x, cueBall.position.y); ctx.lineTo(guia.fin.x, guia.fin.y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.arc(guia.fin.x, guia.fin.y, 4, 0, Math.PI * 2); ctx.fillStyle = '#f4ca64'; ctx.fill();
+        if (guia.objetivo) {
+            ctx.beginPath(); ctx.arc(guia.fantasma.x, guia.fantasma.y, cueBall.circleRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.48)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); ctx.stroke(); ctx.setLineDash([]);
+            const limiteObjetivo = primerLimiteFisico(guia.objetivo.position, guia.normal, guia.objetivo.circleRadius);
+            const largoObjetivo = Math.min(96 * Math.abs(guia.componenteNormal), limiteObjetivo.distancia);
+            ctx.strokeStyle = 'rgba(244,202,100,0.88)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(guia.objetivo.position.x, guia.objetivo.position.y);
+            ctx.lineTo(guia.objetivo.position.x + guia.normal.x * largoObjetivo, guia.objetivo.position.y + guia.normal.y * largoObjetivo); ctx.stroke();
+            const magnitudTangencial = Math.hypot(guia.tangencial.x, guia.tangencial.y);
+            if (magnitudTangencial > 0.03) {
+                const direccionTangente = { x: guia.tangencial.x / magnitudTangencial, y: guia.tangencial.y / magnitudTangencial };
+                const limiteBlanca = primerLimiteFisico(guia.fantasma, direccionTangente, cueBall.circleRadius);
+                const largoBlanca = Math.min(68 * magnitudTangencial, limiteBlanca.distancia);
+                ctx.strokeStyle = 'rgba(111,215,231,0.82)'; ctx.lineWidth = 1.8;
+                ctx.beginPath(); ctx.moveTo(guia.fin.x, guia.fin.y);
+                ctx.lineTo(guia.fin.x + direccionTangente.x * largoBlanca, guia.fin.y + direccionTangente.y * largoBlanca); ctx.stroke();
+            }
+            if (guia.aproximada) {
+                ctx.fillStyle = 'rgba(255,239,190,0.9)'; ctx.font = '700 10px Inter, Arial'; ctx.textAlign = 'left';
+                ctx.fillText('≈ alta potencia', guia.objetivo.position.x + 8, guia.objetivo.position.y - 14);
+            }
+        }
         ctx.restore();
     }
 
     function draw() {
-        const w = canvas.width, h = canvas.height;
+        const w = MESA_W, h = MESA_H;
         ctx.clearRect(0, 0, w, h);
 
-        // fieltro con viñeta y textura sutil
-        const grad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h) * 0.72);
-        grad.addColorStop(0, '#1f6b4f');
-        grad.addColorStop(0.6, '#155c42');
-        grad.addColorStop(1, '#0a2e21');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, w, h);
+        // Marco exterior de nogal con volumen propio de Billar Mundial.
+        const madera = ctx.createLinearGradient(0, 0, 0, h);
+        madera.addColorStop(0, '#9b6235'); madera.addColorStop(0.08, '#4a2817');
+        madera.addColorStop(0.5, '#6a3b20'); madera.addColorStop(0.92, '#32190f'); madera.addColorStop(1, '#140b08');
+        ctx.fillStyle = madera; ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = 'rgba(244,213,143,0.38)'; ctx.lineWidth = 3; ctx.strokeRect(3, 3, w - 6, h - 6);
+        ctx.strokeStyle = 'rgba(8,3,2,0.68)'; ctx.lineWidth = 5; ctx.strokeRect(19, 18, w - 38, h - 36);
 
-        // línea central "de spot" como mesas reales
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(w / 2, 30);
-        ctx.lineTo(w / 2, h - 30);
-        ctx.stroke();
+        const fieltro = ctx.createRadialGradient(w * 0.46, h * 0.42, 30, w / 2, h / 2, w * 0.58);
+        fieltro.addColorStop(0, '#218665'); fieltro.addColorStop(0.58, '#126348'); fieltro.addColorStop(1, '#073728');
+        ctx.fillStyle = fieltro; ctx.fillRect(LIMITE.izquierda, LIMITE.arriba, LIMITE.derecha - LIMITE.izquierda, LIMITE.abajo - LIMITE.arriba);
+        ctx.fillStyle = 'rgba(255,255,255,0.018)';
+        for (let y = 36; y < 450; y += 8) ctx.fillRect(58, y, 844, 1);
 
-        ctx.strokeStyle = 'rgba(60,30,10,0.9)';
-        ctx.lineWidth = 6;
-        ctx.strokeRect(25, 25, w - 50, h - 50);
+        // Bandas acolchadas trapezoidales, separadas en las bocas.
+        const banda = ctx.createLinearGradient(0, 20, 0, 62);
+        banda.addColorStop(0, '#0a3528'); banda.addColorStop(0.45, '#1e7658'); banda.addColorStop(1, '#082c21');
+        const bandaPoligono = puntos => {
+            ctx.beginPath(); puntos.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+            ctx.closePath(); ctx.fillStyle = banda; ctx.fill(); ctx.strokeStyle = 'rgba(126,217,174,0.22)'; ctx.lineWidth = 1.2; ctx.stroke();
+        };
+        bandaPoligono([[83,25],[448,25],[440,47],[91,47]]); bandaPoligono([[512,25],[877,25],[869,47],[520,47]]);
+        bandaPoligono([[83,455],[448,455],[440,433],[91,433]]); bandaPoligono([[512,455],[877,455],[869,433],[520,433]]);
+        bandaPoligono([[52,63],[52,417],[75,409],[75,71]]); bandaPoligono([[908,63],[908,417],[885,409],[885,71]]);
 
-        const dif = paramsDificultad();
-        const pocketRadius = 16 * dif.pocketMult;
         const pocketPositions = [
-            { x: 30, y: 30 }, { x: w / 2, y: 25 }, { x: w - 30, y: 30 },
-            { x: 30, y: h - 30 }, { x: w / 2, y: h - 25 }, { x: w - 30, y: h - 30 }
+            { x: 56, y: 28, r: 25 }, { x: w / 2, y: 24, r: 23 }, { x: 904, y: 28, r: 25 },
+            { x: 56, y: 452, r: 25 }, { x: w / 2, y: 456, r: 23 }, { x: 904, y: 452, r: 25 }
         ];
         pocketPositions.forEach(p => {
-            const pg = ctx.createRadialGradient(p.x, p.y, 1, p.x, p.y, pocketRadius);
-            pg.addColorStop(0, '#000000');
-            pg.addColorStop(1, '#2b1508');
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, pocketRadius, 0, Math.PI * 2);
-            ctx.fillStyle = pg;
-            ctx.fill();
-            ctx.strokeStyle = '#c9a24a';
-            ctx.lineWidth = 1.5;
-            ctx.globalAlpha = 0.5;
-            ctx.stroke();
-            ctx.globalAlpha = 1;
+            const pg = ctx.createRadialGradient(p.x - 3, p.y - 3, 2, p.x, p.y, p.r);
+            pg.addColorStop(0, '#000'); pg.addColorStop(0.62, '#050706'); pg.addColorStop(0.78, '#23140d'); pg.addColorStop(1, '#9a6234');
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = pg; ctx.fill();
+            ctx.strokeStyle = 'rgba(238,190,101,0.4)'; ctx.lineWidth = 2; ctx.stroke();
         });
 
-        ballsArr.forEach((entry, i) => {
+        // Mandíbulas claras alrededor de cada entrada.
+        ctx.strokeStyle = '#927052'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+        [[[72,43],[88,54]],[[888,43],[872,54]],[[72,437],[88,426]],[[888,437],[872,426]],
+         [[450,35],[460,45]],[[510,35],[500,45]],[[450,445],[460,435]],[[510,445],[500,435]]].forEach(s => {
+            ctx.beginPath(); ctx.moveTo(s[0][0],s[0][1]); ctx.lineTo(s[1][0],s[1][1]); ctx.stroke();
+        });
+
+        // Diamantes de referencia incrustados en el marco.
+        ctx.fillStyle = '#e8c874'; ctx.strokeStyle = '#4d321a'; ctx.lineWidth = 1;
+        [168,274,380,580,686,792].forEach(x => {
+            [[x,13],[x,467]].forEach(([dx,dy]) => { ctx.save(); ctx.translate(dx,dy); ctx.rotate(Math.PI/4); ctx.fillRect(-3,-3,6,6); ctx.strokeRect(-3,-3,6,6); ctx.restore(); });
+        });
+        [134,240,346].forEach(y => {
+            [[14,y],[946,y]].forEach(([dx,dy]) => { ctx.save(); ctx.translate(dx,dy); ctx.rotate(Math.PI/4); ctx.fillRect(-3,-3,6,6); ctx.strokeRect(-3,-3,6,6); ctx.restore(); });
+        });
+
+        dibujarGuia();
+
+        ballsArr.forEach(entry => {
             if (entry.isPocketed) return;
             const body = entry.body;
-            dibujarBola(body.position.x, body.position.y, COLORES[i % COLORES.length], false, i + 1);
+            dibujarBola(body.position.x, body.position.y, body.plugin.numero);
         });
         dibujarTaco();
-        if (cueBall) dibujarBola(cueBall.position.x, cueBall.position.y, null, true, 0);
-
-        if (isDragging) {
-            const dx = dragStartX - dragEndX;
-            const dy = dragStartY - dragEndY;
-            const len = Math.sqrt(dx * dx + dy * dy);
-            if (len > 1) {
-                const maxLen = 80;
-                const clampedLen = Math.min(len, maxLen);
-                const ratio = clampedLen / maxLen;
-                const power = ratio * 20;
-
-                ctx.beginPath();
-                ctx.moveTo(dragStartX, dragStartY);
-                ctx.lineTo(dragStartX - dx / len * clampedLen, dragStartY - dy / len * clampedLen);
-                ctx.strokeStyle = `rgba(232, 200, 116, ${0.35 + ratio * 0.65})`;
-                ctx.lineWidth = 3;
-                ctx.setLineDash([5, 5]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                ctx.fillStyle = '#e8c874';
-                ctx.font = '600 13px Inter, Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(`${Math.round(power)}`, dragStartX, dragStartY - 40);
-            }
-        }
+        if (cueBall) dibujarBola(cueBall.position.x, cueBall.position.y, 0);
 
         const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.font = '600 12px Inter, Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(`Faltan ${bolasVivas}`, 20, 18);
+        ctx.fillStyle = 'rgba(255,244,215,0.88)'; ctx.font = '700 11px Inter, Arial'; ctx.textAlign = 'left';
+        ctx.fillText(`OBJETIVAS · ${bolasVivas}`, 31, 16);
     }
 
     // ---- Loop persistente (uno solo, siempre) ----
     let rafId = null;
     function loopStep() {
         if (document.getElementById('pantalla-juego').classList.contains('activa') && runner && runner.enabled) {
+            actualizarGolpe();
             draw();
             revisarSiSeDetuvieron();
         }
@@ -756,6 +958,7 @@
         if (!todasQuietas()) return;
         esperandoResultado = false;
         puedeDisparar = true;
+        actualizarBarraPotencia(0);
 
         const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
         if (bolasVivas === 0) {
@@ -792,7 +995,9 @@
         tirosRestantes = Math.max(8, 25 - (nivel - 1) + dif.tirosExtra);
         puedeDisparar = true;
         esperandoResultado = false;
-        isDragging = false;
+        apuntando = false;
+        cargandoPotencia = false;
+        golpeAnim = null;
 
         juegoInfo.textContent = `${paises[paisIdx].bandera} ${paises[paisIdx].nombre} Nivel ${nivel}/${NIVELES_POR_PAIS}`;
         juegoTiros.textContent = `🔫 ${tirosRestantes}`;
@@ -806,71 +1011,142 @@
         if (runner) runner.enabled = true;
     }
 
-    // ---- Entrada táctil / mouse ----
+    // ---- Puntería y potencia: dos gestos independientes con Pointer Events ----
     function getPos(e) {
         const rect = canvas.getBoundingClientRect();
-        let clientX, clientY;
-        if (e.touches && e.touches.length) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-        else { clientX = e.clientX; clientY = e.clientY; }
-        return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+        return { x: (e.clientX - rect.left) * (MESA_W / rect.width), y: (e.clientY - rect.top) * (MESA_H / rect.height) };
     }
 
-    function onPointerDown(e) {
-        e.preventDefault();
-        if (!puedeDisparar || !cueBall) return;
-        const pos = getPos(e);
+    function controlDisponible() {
+        return puedeDisparar && !esperandoResultado && !golpeAnim && !!cueBall && todasQuietas();
+    }
+
+    function orientarHacia(pos) {
         const dx = pos.x - cueBall.position.x;
         const dy = pos.y - cueBall.position.y;
-        if (dx * dx + dy * dy < 900) {
-            isDragging = true;
-            dragStartX = cueBall.position.x;
-            dragStartY = cueBall.position.y;
-            dragEndX = pos.x;
-            dragEndY = pos.y;
-        }
+        const longitud = Math.hypot(dx, dy);
+        if (longitud > 4) direccionTiro = { x: dx / longitud, y: dy / longitud };
     }
-    function onPointerMove(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        const pos = getPos(e);
-        dragEndX = pos.x;
-        dragEndY = pos.y;
+
+    canvas.addEventListener('pointerdown', e => {
+        if (!controlDisponible()) return;
+        e.preventDefault(); apuntando = true; canvas.setPointerCapture(e.pointerId); orientarHacia(getPos(e));
+    });
+    canvas.addEventListener('pointermove', e => {
+        if (!apuntando) return;
+        e.preventDefault(); orientarHacia(getPos(e));
+    });
+    const terminarPunteria = e => {
+        if (!apuntando) return;
+        apuntando = false;
+        if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+    };
+    canvas.addEventListener('pointerup', terminarPunteria);
+    canvas.addEventListener('pointercancel', terminarPunteria);
+
+    function actualizarBarraPotencia(valor) {
+        potenciaTiro = Math.max(0, Math.min(1, valor));
+        barraPotencia.style.setProperty('--power', potenciaTiro.toFixed(3));
+        const porcentaje = Math.round(potenciaTiro * 100);
+        barraPotencia.setAttribute('aria-valuenow', String(porcentaje));
+        potenciaValor.value = `${porcentaje}%`;
+        potenciaValor.textContent = `${porcentaje}%`;
     }
-    function onPointerUp(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        isDragging = false;
-        const dx = dragStartX - dragEndX;
-        const dy = dragStartY - dragEndY;
-        const len = Math.sqrt(dx * dx + dy * dy);
-        if (len > 10 && puedeDisparar) {
-            const maxLen = 80;
-            const clampedLen = Math.min(len, maxLen);
-            const ratio = clampedLen / maxLen;
-            const power = ratio * 20;
-            const angle = Math.atan2(dy, dx);
-            golpeAnim = { angle: angle, t0: performance.now() };
 
-            Matter.Body.setVelocity(cueBall, { x: Math.cos(angle) * power, y: Math.sin(angle) * power });
-
-            tirosRestantes--;
-            juegoTiros.textContent = `🔫 ${tirosRestantes}`;
+    let inicioArrastrePotencia = 0;
+    let punteroPotencia = null;
+    function cargarPotenciaDesde(e) {
+        const rect = barraPotencia.getBoundingClientRect();
+        actualizarBarraPotencia((e.clientY - inicioArrastrePotencia) / Math.max(1, rect.height - 20));
+    }
+    barraPotencia.addEventListener('pointerdown', e => {
+        if (!controlDisponible()) return;
+        e.preventDefault(); cargandoPotencia = true; punteroPotencia = e.pointerId; inicioArrastrePotencia = e.clientY;
+        barraPotencia.classList.remove('retorno'); barraPotencia.classList.add('cargando');
+        barraPotencia.setPointerCapture(e.pointerId); actualizarBarraPotencia(0);
+    });
+    barraPotencia.addEventListener('pointermove', e => {
+        if (!cargandoPotencia || e.pointerId !== punteroPotencia) return;
+        e.preventDefault(); cargarPotenciaDesde(e);
+    });
+    function soltarPotencia(e) {
+        if (!cargandoPotencia || e.pointerId !== punteroPotencia) return;
+        e.preventDefault(); cargandoPotencia = false;
+        if (barraPotencia.hasPointerCapture(e.pointerId)) barraPotencia.releasePointerCapture(e.pointerId);
+        punteroPotencia = null;
+        barraPotencia.classList.remove('cargando'); barraPotencia.classList.add('retorno');
+        const potencia = potenciaTiro;
+        if (potencia >= 0.06 && controlDisponible()) {
             puedeDisparar = false;
-            esperandoResultado = true;
+            golpeAnim = { t0: performance.now(), retroceso: 18 + potencia * 62, potencia, disparado: false };
+        } else {
+            actualizarBarraPotencia(0);
+        }
+    }
+    barraPotencia.addEventListener('pointerup', soltarPotencia);
+    function cancelarCargaPotencia(e) {
+        if (!cargandoPotencia || (e && e.pointerId !== punteroPotencia)) return;
+        cargandoPotencia = false;
+        if (e && barraPotencia.hasPointerCapture(e.pointerId)) barraPotencia.releasePointerCapture(e.pointerId);
+        punteroPotencia = null;
+        barraPotencia.classList.remove('cargando'); barraPotencia.classList.add('retorno');
+        actualizarBarraPotencia(0);
+    }
+    barraPotencia.addEventListener('pointercancel', cancelarCargaPotencia);
+    barraPotencia.addEventListener('lostpointercapture', e => {
+        if (cargandoPotencia && e.pointerId === punteroPotencia) cancelarCargaPotencia(e);
+    });
+    barraPotencia.addEventListener('contextmenu', e => e.preventDefault());
+
+    function productoPuntoTiro(velocidad, direccion) {
+        return velocidad.x * direccion.x + velocidad.y * direccion.y;
+    }
+
+    function efectuarDisparo(potencia) {
+        const rapidez = 4 + potencia * 20;
+        const velocidad = { x: direccionTiro.x * rapidez, y: direccionTiro.y * rapidez };
+        const producto = productoPuntoTiro(velocidad, direccionTiro);
+        console.assert(producto > 0, 'La velocidad debe avanzar en la dirección mostrada por la guía.');
+        if (producto <= 0) throw new Error('Dirección de tiro inválida');
+        const guiaDisparo = calcularGuia();
+        prediccionActiva = guiaDisparo && guiaDisparo.objetivo ? { objetivo: guiaDisparo.objetivo, normal: { ...guiaDisparo.normal } } : null;
+        medicionColision = null;
+        Matter.Body.setVelocity(cueBall, velocidad);
+        tirosRestantes--;
+        juegoTiros.textContent = `🔫 ${tirosRestantes}`;
+        esperandoResultado = true;
+        actualizarBarraPotencia(0);
+    }
+
+    function actualizarGolpe() {
+        if (!golpeAnim || golpeAnim.disparado) return;
+        if (performance.now() - golpeAnim.t0 >= 118) {
+            golpeAnim.disparado = true;
+            efectuarDisparo(golpeAnim.potencia);
         }
     }
 
-    canvas.addEventListener('mousedown', onPointerDown);
-    canvas.addEventListener('mousemove', onPointerMove);
-    canvas.addEventListener('mouseup', onPointerUp);
-    canvas.addEventListener('mouseleave', onPointerUp);
-    canvas.addEventListener('touchstart', onPointerDown, { passive: false });
-    canvas.addEventListener('touchmove', onPointerMove, { passive: false });
-    canvas.addEventListener('touchend', onPointerUp, { passive: false });
+    function moverPuntoImpacto(e) {
+        const rect = bolaImpacto.getBoundingClientRect();
+        const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width * 0.36);
+        const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height * 0.36);
+        const longitud = Math.max(1, Math.hypot(dx, dy));
+        puntoEfecto = longitud > 1 ? { x: dx / longitud, y: dy / longitud } : { x: dx, y: dy };
+        puntoImpacto.style.left = `${50 + puntoEfecto.x * 34}%`;
+        puntoImpacto.style.top = `${50 + puntoEfecto.y * 34}%`;
+    }
+    bolaImpacto.addEventListener('pointerdown', e => { e.preventDefault(); bolaImpacto.setPointerCapture(e.pointerId); moverPuntoImpacto(e); });
+    bolaImpacto.addEventListener('pointermove', e => { if (bolaImpacto.hasPointerCapture(e.pointerId)) moverPuntoImpacto(e); });
+    bolaImpacto.addEventListener('pointerup', e => { if (bolaImpacto.hasPointerCapture(e.pointerId)) bolaImpacto.releasePointerCapture(e.pointerId); });
 
     // ---- Navegación entre pantallas ----
     function mostrarPantalla(id) {
         if (id !== 'pantalla-mapa') cancelarViaje();
+        document.getElementById('app').classList.toggle('modo-juego', id === 'pantalla-juego');
+        if (id !== 'pantalla-juego') {
+            apuntando = false;
+            cancelarCargaPotencia();
+        }
         document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
         document.getElementById(id).classList.add('activa');
     }
@@ -942,6 +1218,40 @@
     document.getElementById('btn-coleccion').onclick = () => { actualizarColeccion(); mostrarPantalla('pantalla-coleccion'); };
     document.getElementById('btn-config').onclick = () => mostrarPantalla('pantalla-config');
     document.getElementById('config-dificultad').onchange = (e) => { dificultad = e.target.value; };
+
+    function ejecutarPruebasGeometricas() {
+        const angulos = [0, 15, 30, 45, 60];
+        const resultados = angulos.map(grados => {
+            const radianes = grados * Math.PI / 180;
+            const normalPrevista = { x: Math.cos(radianes), y: Math.sin(radianes) };
+            const fantasma = { x: 280, y: 220 };
+            const objetivoPrueba = {
+                position: { x: fantasma.x + normalPrevista.x * RADIO_BOLA * 2, y: fantasma.y + normalPrevista.y * RADIO_BOLA * 2 },
+                circleRadius: RADIO_BOLA
+            };
+            const prediccion = contactoCircular({ x: 100, y: 220 }, { x: 1, y: 0 }, RADIO_BOLA, objetivoPrueba);
+            const motorPrueba = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+            const blancaPrueba = Matter.Bodies.circle(100, 220, RADIO_BOLA, { restitution: 1, friction: 0, frictionAir: 0 });
+            const bolaPrueba = Matter.Bodies.circle(objetivoPrueba.position.x, objetivoPrueba.position.y, RADIO_BOLA, { restitution: 1, friction: 0, frictionAir: 0 });
+            Matter.Composite.add(motorPrueba.world, [blancaPrueba, bolaPrueba]);
+            Matter.Body.setVelocity(blancaPrueba, { x: 8, y: 0 });
+            for (let paso = 0; paso < 80 && Matter.Vector.magnitude(bolaPrueba.velocity) < 0.01; paso++) {
+                Matter.Engine.update(motorPrueba, 1000 / 120);
+            }
+            const rapidezReal = Matter.Vector.magnitude(bolaPrueba.velocity);
+            const coseno = rapidezReal > 0
+                ? Math.max(-1, Math.min(1, Matter.Vector.dot(bolaPrueba.velocity, prediccion.normal) / rapidezReal))
+                : -1;
+            const errorAngular = Math.acos(coseno) * 180 / Math.PI;
+            Matter.Composite.clear(motorPrueba.world, false);
+            Matter.Engine.clear(motorPrueba);
+            return { corte: `${grados}°`, errorAngular: Number(errorAngular.toFixed(4)), contacto: rapidezReal > 0 };
+        });
+        console.table(resultados);
+        return resultados;
+    }
+
+    const resultadosPruebasGeometricas = ejecutarPruebasGeometricas();
 
     // ---- Mapa ----
     const canvasMapa = document.getElementById('lienzo-mapa');
