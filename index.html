@@ -497,8 +497,22 @@
 
     const MESA_W = 960;
     const MESA_H = 480;
-    const LIMITE = { izquierda: 56, derecha: 904, arriba: 28, abajo: 452 };
+    const LIMITE = { izquierda: 75, derecha: 885, arriba: 47, abajo: 433 };
     const RADIO_BOLA = 11;
+    const GEOMETRIA_TRONERAS = {
+        centros: [[45,17],[480,15],[915,17],[45,463],[480,465],[915,463]],
+        bandas: [
+            [115,36,441,36,22],[519,36,845,36,22],
+            [115,444,441,444,22],[519,444,845,444,22],
+            [63.5,91,63.5,389,23],[896.5,91,896.5,389,23]
+        ],
+        mandibulas: [
+            [115,47,103,35,8],[75,91,63,79,8], [845,47,857,35,8],[885,91,897,79,8],
+            [115,433,103,445,8],[75,389,63,401,8], [845,433,857,445,8],[885,389,897,401,8],
+            [441,47,451,35,8],[519,47,509,35,8], [441,433,451,445,8],[519,433,509,445,8]
+        ]
+    };
+    const DEBUG_TRONERAS = new URLSearchParams(window.location.search).has('debug-pockets');
 
     // ---- Matter.js (creados UNA sola vez) ----
     let engine = null, world = null, runner = null;
@@ -509,6 +523,13 @@
     let medicionColision = null;
     let ultimoErrorAngular = null;
     let cueStartPos = { x: 0, y: 0 };
+    const PASO_FISICO_MS = 1000 / 120;
+    const VELOCIDAD_MAXIMA = 24;
+    const DURACION_CAIDA_MS = 220;
+    let tiempoFisicoMs = 0;
+    let acumuladorFisicoMs = 0;
+    let ultimoFrameFisico = null;
+    const sensoresDiagnosticados = new Set();
     const COLORES_BILLAR = ['#e4b628','#205ba5','#c33b32','#683d91','#df7624','#278453','#7b2729','#17191b'];
 
     let apuntando = false;
@@ -534,7 +555,6 @@
         engine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
         world = engine.world;
         runner = Matter.Runner.create();
-        Matter.Runner.run(runner, engine);
 
         Matter.Events.on(engine, 'collisionStart', (event) => {
             event.pairs.forEach(pair => {
@@ -547,17 +567,11 @@
                 if (a.label === 'pocket' && (b.label === 'ball' || b.label === 'cueBall')) { pocket = a; ball = b; isCue = b.label === 'cueBall'; }
                 else if (b.label === 'pocket' && (a.label === 'ball' || a.label === 'cueBall')) { pocket = b; ball = a; isCue = a.label === 'cueBall'; }
                 if (!pocket || !ball) return;
-
-                if (isCue) {
-                    // La bola blanca cayó: se repone en su posición inicial
-                    Matter.Body.setPosition(ball, cueStartPos);
-                    Matter.Body.setVelocity(ball, { x: 0, y: 0 });
-                } else if (!ball.plugin || !ball.plugin.isPocketed) {
-                    ball.plugin = ball.plugin || {};
-                    ball.plugin.isPocketed = true;
-                    Matter.Composite.remove(world, ball);
-                    const entry = ballsArr.find(e => e.body === ball);
-                    if (entry) entry.isPocketed = true;
+                const validacion = validarCapturaTronera(ball, pocket);
+                const clave = `${ball.id}:${pocket.id}`;
+                if (!validacion.valida && !sensoresDiagnosticados.has(clave)) {
+                    sensoresDiagnosticados.add(clave);
+                    registrarDiagnostico(ball, 'activación falsa de sensor', { razon: validacion.razon, blanca: isCue });
                 }
             });
         });
@@ -597,41 +611,35 @@
         Matter.Composite.clear(world, false);
         walls = []; pockets = []; ballsArr = [];
         prediccionActiva = null; medicionColision = null; ultimoErrorAngular = null;
+        tiempoFisicoMs = 0; acumuladorFisicoMs = 0; ultimoFrameFisico = null; sensoresDiagnosticados.clear();
 
         const w = MESA_W, h = MESA_H;
         const dif = paramsDificultad();
 
         const wallOptions = { isStatic: true, friction: 0.18, restitution: 0.88, label: 'rail' };
-        const recta = (x1, y1, x2, y2, grosor = 10) => {
+        const recta = (x1, y1, x2, y2, grosor = 10, tipo = 'banda') => {
             const largo = Math.hypot(x2 - x1, y2 - y1);
             const cuerpo = Matter.Bodies.rectangle((x1 + x2) / 2, (y1 + y2) / 2, largo, grosor, {
-                ...wallOptions, angle: Math.atan2(y2 - y1, x2 - x1)
+                ...wallOptions, angle: Math.atan2(y2 - y1, x2 - x1), chamfer: { radius: Math.min(grosor / 2, 5) }
             });
-            cuerpo.plugin = { guia: { largo, grosor } };
+            cuerpo.plugin = { guia: { largo, grosor }, tipoGeometria: tipo };
             return cuerpo;
         };
-        // Bandas segmentadas: las aberturas reales permiten entrar a las seis troneras.
+        // Los mismos cuerpos redondeados se usan para física, dibujo y depuración.
         walls = [
-            recta(87, LIMITE.arriba, 444, LIMITE.arriba), recta(516, LIMITE.arriba, 873, LIMITE.arriba),
-            recta(87, LIMITE.abajo, 444, LIMITE.abajo), recta(516, LIMITE.abajo, 873, LIMITE.abajo),
-            recta(LIMITE.izquierda, 67, LIMITE.izquierda, 413), recta(LIMITE.derecha, 67, LIMITE.derecha, 413),
-            recta(70, 46, 87, 58, 9), recta(873, 58, 890, 46, 9),
-            recta(70, 434, 87, 422, 9), recta(873, 422, 890, 434, 9),
-            recta(444, 35, 458, 46, 8), recta(502, 46, 516, 35, 8),
-            recta(444, 445, 458, 434, 8), recta(502, 434, 516, 445, 8)
+            ...GEOMETRIA_TRONERAS.bandas.map(segmento => recta(...segmento, 'banda')),
+            ...GEOMETRIA_TRONERAS.mandibulas.map(segmento => recta(...segmento, 'mandibula'))
         ];
         Matter.Composite.add(world, walls);
 
         const pocketRadius = 22 * dif.pocketMult;
-        const pocketPositions = [
-            { x: 56, y: 28 }, { x: w / 2, y: 24 }, { x: 904, y: 28 },
-            { x: 56, y: 452 }, { x: w / 2, y: 456 }, { x: 904, y: 452 }
-        ];
+        const pocketPositions = GEOMETRIA_TRONERAS.centros.map(([x, y]) => ({ x, y }));
         pockets = pocketPositions.map(pos => Matter.Bodies.circle(pos.x, pos.y, pocketRadius, { isStatic: true, isSensor: true, label: 'pocket' }));
         Matter.Composite.add(world, pockets);
 
         cueStartPos = { x: 255, y: h / 2 };
         cueBall = Matter.Bodies.circle(cueStartPos.x, cueStartPos.y, RADIO_BOLA, { restitution: 0.9, friction: 0.045, frictionAir: 0.012, label: 'cueBall' });
+        cueBall.plugin = { ultimaPosicionValida: { ...cueStartPos }, falling: null };
         Matter.Composite.add(world, cueBall);
 
         const rackCompleto = generarPosicionesRack(15, 650, h / 2, RADIO_BOLA * 2 + 1.5);
@@ -641,13 +649,176 @@
             const body = Matter.Bodies.circle(p.x, p.y, RADIO_BOLA, {
                 restitution: 0.9, friction: 0.05, frictionAir: 0.012, label: 'ball'
             });
-            body.plugin = { isPocketed: false, numero: ordenRack[i] };
+            body.plugin = { isPocketed: false, numero: ordenRack[i], ultimaPosicionValida: { x: p.x, y: p.y }, falling: null };
             Matter.Composite.add(world, body);
             ballsArr.push({ body, isPocketed: false });
         });
         direccionTiro = { x: 1, y: 0 };
         potenciaTiro = 0;
         actualizarBarraPotencia(0);
+    }
+
+    function numeroBola(body) {
+        return body === cueBall ? 'blanca' : (body.plugin && body.plugin.numero) || '?';
+    }
+
+    function registrarDiagnostico(body, causa, detalle = {}) {
+        console.warn('[Física Billar Mundial]', {
+            bola: numeroBola(body),
+            posicion: { x: Number(body.position.x.toFixed(3)), y: Number(body.position.y.toFixed(3)) },
+            velocidad: { x: Number(body.velocity.x.toFixed(3)), y: Number(body.velocity.y.toFixed(3)) },
+            causa,
+            ...detalle
+        });
+    }
+
+    function validarCapturaTronera(ball, pocket) {
+        if (!ball || !pocket || (ball.plugin && ball.plugin.falling)) return { valida: false, razon: 'bola no disponible' };
+        const dx = pocket.position.x - ball.position.x;
+        const dy = pocket.position.y - ball.position.y;
+        const distancia = Math.hypot(dx, dy);
+        const profundidadCaptura = Math.max(5, pocket.circleRadius - ball.circleRadius * 0.18);
+        if (distancia > profundidadCaptura) return { valida: false, razon: 'centro fuera de zona de captura' };
+        const velocidadInterior = distancia > 0.001 ? (ball.velocity.x * dx + ball.velocity.y * dy) / distancia : 0;
+        const profundamenteDentro = distancia < profundidadCaptura * 0.52;
+        if (velocidadInterior <= 0.015 && !profundamenteDentro) return { valida: false, razon: 'trayectoria tangencial o hacia el exterior' };
+        return { valida: true, distancia, velocidadInterior };
+    }
+
+    function iniciarCaida(ball, pocket, validacion) {
+        ball.plugin = ball.plugin || {};
+        if (ball.plugin.falling || ball.plugin.isPocketed) return;
+        ball.plugin.falling = {
+            inicio: tiempoFisicoMs,
+            desde: { x: ball.position.x, y: ball.position.y },
+            destino: { x: pocket.position.x, y: pocket.position.y },
+            filtro: { category: ball.collisionFilter.category, mask: ball.collisionFilter.mask }
+        };
+        ball.collisionFilter.mask = 0;
+        Matter.Body.setVelocity(ball, { x: 0, y: 0 });
+        Matter.Body.setAngularVelocity(ball, 0);
+        registrarDiagnostico(ball, 'bola embocada legítimamente', {
+            distanciaCentro: Number(validacion.distancia.toFixed(3)),
+            velocidadInterior: Number(validacion.velocidadInterior.toFixed(3))
+        });
+    }
+
+    function evaluarTroneras() {
+        const cuerpos = [cueBall, ...ballsArr.filter(e => !e.isPocketed).map(e => e.body)].filter(Boolean);
+        cuerpos.forEach(ball => {
+            if (ball.plugin && (ball.plugin.falling || ball.plugin.isPocketed)) return;
+            for (const pocket of pockets) {
+                const validacion = validarCapturaTronera(ball, pocket);
+                if (validacion.valida) { iniciarCaida(ball, pocket, validacion); break; }
+            }
+        });
+    }
+
+    function posicionSinSolapamiento(preferida, body) {
+        const otros = [cueBall, ...ballsArr.filter(e => !e.isPocketed).map(e => e.body)]
+            .filter(otro => otro && otro !== body && !(otro.plugin && otro.plugin.falling));
+        const candidatos = [preferida];
+        for (let radio = RADIO_BOLA * 2.4; radio <= RADIO_BOLA * 8; radio += RADIO_BOLA * 1.2) {
+            for (let i = 0; i < 12; i++) candidatos.push({
+                x: preferida.x + Math.cos(i * Math.PI / 6) * radio,
+                y: preferida.y + Math.sin(i * Math.PI / 6) * radio
+            });
+        }
+        return candidatos.find(pos =>
+            pos.x >= LIMITE.izquierda + RADIO_BOLA && pos.x <= LIMITE.derecha - RADIO_BOLA &&
+            pos.y >= LIMITE.arriba + RADIO_BOLA && pos.y <= LIMITE.abajo - RADIO_BOLA &&
+            otros.every(otro => Math.hypot(pos.x - otro.position.x, pos.y - otro.position.y) >= body.circleRadius + otro.circleRadius + 1)
+        ) || (body === cueBall ? { ...cueStartPos } : { x: MESA_W / 2, y: MESA_H / 2 });
+    }
+
+    function restaurarBola(body, causa) {
+        body.plugin = body.plugin || {};
+        const estadoDetectado = {
+            posicion: { x: body.position.x, y: body.position.y },
+            velocidad: { x: body.velocity.x, y: body.velocity.y }
+        };
+        const base = body.plugin.ultimaPosicionValida || (body === cueBall ? cueStartPos : { x: MESA_W / 2, y: MESA_H / 2 });
+        const segura = posicionSinSolapamiento(base, body);
+        const presentes = new Set(Matter.Composite.allBodies(world));
+        if (!presentes.has(body)) Matter.Composite.add(world, body);
+        Matter.Body.setPosition(body, segura);
+        Matter.Body.setVelocity(body, { x: 0, y: 0 });
+        Matter.Body.setAngularVelocity(body, 0);
+        if (!Number.isFinite(body.angle)) Matter.Body.setAngle(body, 0);
+        body.plugin.ultimaPosicionValida = { ...segura };
+        registrarDiagnostico(body, causa, { estadoDetectado, restauradaEn: segura });
+    }
+
+    function actualizarCaidas() {
+        const cuerpos = [cueBall, ...ballsArr.filter(e => !e.isPocketed).map(e => e.body)].filter(Boolean);
+        cuerpos.forEach(body => {
+            const caida = body.plugin && body.plugin.falling;
+            if (!caida) return;
+            const progreso = Math.min(1, (tiempoFisicoMs - caida.inicio) / DURACION_CAIDA_MS);
+            const suavizado = progreso * progreso * (3 - 2 * progreso);
+            Matter.Body.setPosition(body, {
+                x: caida.desde.x + (caida.destino.x - caida.desde.x) * suavizado,
+                y: caida.desde.y + (caida.destino.y - caida.desde.y) * suavizado
+            });
+            if (progreso < 1) return;
+            if (body === cueBall) {
+                body.plugin.falling = null;
+                body.collisionFilter.category = caida.filtro.category;
+                body.collisionFilter.mask = caida.filtro.mask;
+                const segura = posicionSinSolapamiento(cueStartPos, body);
+                Matter.Body.setPosition(body, segura);
+                Matter.Body.setVelocity(body, { x: 0, y: 0 });
+                body.plugin.ultimaPosicionValida = { ...segura };
+                registrarDiagnostico(body, 'bola blanca repuesta tras embocada', { restauradaEn: segura });
+            } else {
+                body.plugin.falling = null;
+                body.plugin.isPocketed = true;
+                const entry = ballsArr.find(e => e.body === body);
+                if (entry) entry.isPocketed = true;
+                Matter.Composite.remove(world, body);
+            }
+        });
+    }
+
+    function limitarVelocidades() {
+        [cueBall, ...ballsArr.filter(e => !e.isPocketed).map(e => e.body)].filter(Boolean).forEach(body => {
+            if (body.plugin && body.plugin.falling) return;
+            const rapidez = Math.hypot(body.velocity.x, body.velocity.y);
+            if (rapidez > VELOCIDAD_MAXIMA) {
+                const escala = VELOCIDAD_MAXIMA / rapidez;
+                Matter.Body.setVelocity(body, { x: body.velocity.x * escala, y: body.velocity.y * escala });
+                registrarDiagnostico(body, 'velocidad limitada para evitar tunneling', { velocidadAnterior: Number(rapidez.toFixed(3)) });
+            }
+        });
+    }
+
+    function comprobarEstabilidad() {
+        const presentes = new Set(Matter.Composite.allBodies(world));
+        [cueBall, ...ballsArr.filter(e => !e.isPocketed).map(e => e.body)].filter(Boolean).forEach(body => {
+            if (body.plugin && body.plugin.falling) return;
+            if (!presentes.has(body)) { restaurarBola(body, 'cuerpo ausente sin embocada'); return; }
+            const finita = Number.isFinite(body.position.x) && Number.isFinite(body.position.y) &&
+                Number.isFinite(body.velocity.x) && Number.isFinite(body.velocity.y);
+            if (!finita) { restaurarBola(body, 'posición o velocidad no válida'); return; }
+            const dentro = body.position.x >= 34 && body.position.x <= 926 && body.position.y >= 6 && body.position.y <= 474;
+            if (!dentro) {
+                const fueraTotal = body.position.x < -10 || body.position.x > MESA_W + 10 || body.position.y < -10 || body.position.y > MESA_H + 10;
+                restaurarBola(body, fueraTotal ? 'salida de límites físicos' : 'banda atravesada a alta velocidad');
+                return;
+            }
+            const zonaSegura = body.position.x >= LIMITE.izquierda + body.circleRadius && body.position.x <= LIMITE.derecha - body.circleRadius &&
+                body.position.y >= LIMITE.arriba + body.circleRadius && body.position.y <= LIMITE.abajo - body.circleRadius;
+            if (zonaSegura) body.plugin.ultimaPosicionValida = { x: body.position.x, y: body.position.y };
+        });
+    }
+
+    function pasoFisicoFijo() {
+        limitarVelocidades();
+        Matter.Engine.update(engine, PASO_FISICO_MS);
+        tiempoFisicoMs += PASO_FISICO_MS;
+        evaluarTroneras();
+        actualizarCaidas();
+        comprobarEstabilidad();
     }
 
     // ---- Dibujo ----
@@ -856,6 +1027,38 @@
         ctx.restore();
     }
 
+    function dibujarBolaFisica(body, numero) {
+        const caida = body.plugin && body.plugin.falling;
+        if (!caida) { dibujarBola(body.position.x, body.position.y, numero); return; }
+        const progreso = Math.min(1, (tiempoFisicoMs - caida.inicio) / DURACION_CAIDA_MS);
+        ctx.save();
+        ctx.globalAlpha = Math.max(0.12, 1 - progreso * 0.78);
+        ctx.translate(body.position.x, body.position.y);
+        const escala = 1 - progreso * 0.72;
+        ctx.scale(escala, escala);
+        dibujarBola(0, 0, numero);
+        ctx.restore();
+    }
+
+    function dibujarDepuracionTroneras() {
+        ctx.save();
+        ctx.setLineDash([4, 3]);
+        walls.forEach(wall => {
+            ctx.beginPath();
+            wall.vertices.forEach((vertice, i) => i ? ctx.lineTo(vertice.x, vertice.y) : ctx.moveTo(vertice.x, vertice.y));
+            ctx.closePath(); ctx.strokeStyle = '#31e7ff'; ctx.lineWidth = 1.4; ctx.stroke();
+        });
+        pockets.forEach(pocket => {
+            ctx.beginPath(); ctx.arc(pocket.position.x, pocket.position.y, pocket.circleRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#ff4fd8'; ctx.lineWidth = 1.4; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pocket.position.x - 4, pocket.position.y); ctx.lineTo(pocket.position.x + 4, pocket.position.y);
+            ctx.moveTo(pocket.position.x, pocket.position.y - 4); ctx.lineTo(pocket.position.x, pocket.position.y + 4); ctx.stroke();
+        });
+        ctx.setLineDash([]); ctx.fillStyle = '#fff'; ctx.font = '700 9px Inter, Arial'; ctx.textAlign = 'center';
+        ctx.fillText('esquina 2.34Ø', 92, 105); ctx.fillText('lateral 2.27Ø', 480, 62); ctx.fillText('esquina 2.34Ø', 868, 105);
+        ctx.restore();
+    }
+
     function draw() {
         const w = MESA_W, h = MESA_H;
         ctx.clearRect(0, 0, w, h);
@@ -874,34 +1077,27 @@
         ctx.fillStyle = 'rgba(255,255,255,0.018)';
         for (let y = 36; y < 450; y += 8) ctx.fillRect(58, y, 844, 1);
 
-        // Bandas acolchadas trapezoidales, separadas en las bocas.
+        // Sombra profunda de las buchacas: mismos centros y radios que los sensores físicos.
+        pockets.forEach(p => {
+            const r = p.circleRadius;
+            const pg = ctx.createRadialGradient(p.position.x - 3, p.position.y - 3, 2, p.position.x, p.position.y, r);
+            pg.addColorStop(0, '#000'); pg.addColorStop(0.62, '#050706'); pg.addColorStop(0.8, '#23140d'); pg.addColorStop(1, '#6f4728');
+            ctx.beginPath(); ctx.arc(p.position.x, p.position.y, r, 0, Math.PI * 2); ctx.fillStyle = pg; ctx.fill();
+            ctx.strokeStyle = 'rgba(238,190,101,0.32)'; ctx.lineWidth = 1.5; ctx.stroke();
+        });
+
+        // Bandas y extremos redondeados dibujados desde los vértices físicos de Matter.
         const banda = ctx.createLinearGradient(0, 20, 0, 62);
         banda.addColorStop(0, '#0a3528'); banda.addColorStop(0.45, '#1e7658'); banda.addColorStop(1, '#082c21');
-        const bandaPoligono = puntos => {
-            ctx.beginPath(); puntos.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-            ctx.closePath(); ctx.fillStyle = banda; ctx.fill(); ctx.strokeStyle = 'rgba(126,217,174,0.22)'; ctx.lineWidth = 1.2; ctx.stroke();
-        };
-        bandaPoligono([[83,25],[448,25],[440,47],[91,47]]); bandaPoligono([[512,25],[877,25],[869,47],[520,47]]);
-        bandaPoligono([[83,455],[448,455],[440,433],[91,433]]); bandaPoligono([[512,455],[877,455],[869,433],[520,433]]);
-        bandaPoligono([[52,63],[52,417],[75,409],[75,71]]); bandaPoligono([[908,63],[908,417],[885,409],[885,71]]);
-
-        const pocketPositions = [
-            { x: 56, y: 28, r: 25 }, { x: w / 2, y: 24, r: 23 }, { x: 904, y: 28, r: 25 },
-            { x: 56, y: 452, r: 25 }, { x: w / 2, y: 456, r: 23 }, { x: 904, y: 452, r: 25 }
-        ];
-        pocketPositions.forEach(p => {
-            const pg = ctx.createRadialGradient(p.x - 3, p.y - 3, 2, p.x, p.y, p.r);
-            pg.addColorStop(0, '#000'); pg.addColorStop(0.62, '#050706'); pg.addColorStop(0.78, '#23140d'); pg.addColorStop(1, '#9a6234');
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = pg; ctx.fill();
-            ctx.strokeStyle = 'rgba(238,190,101,0.4)'; ctx.lineWidth = 2; ctx.stroke();
+        walls.forEach(wall => {
+            ctx.beginPath();
+            wall.vertices.forEach((vertice, i) => i ? ctx.lineTo(vertice.x, vertice.y) : ctx.moveTo(vertice.x, vertice.y));
+            ctx.closePath(); ctx.fillStyle = banda; ctx.fill();
+            ctx.strokeStyle = wall.plugin.tipoGeometria === 'mandibula' ? 'rgba(164,224,192,0.38)' : 'rgba(126,217,174,0.22)';
+            ctx.lineWidth = 1.2; ctx.stroke();
         });
 
-        // Mandíbulas claras alrededor de cada entrada.
-        ctx.strokeStyle = '#927052'; ctx.lineWidth = 7; ctx.lineCap = 'round';
-        [[[72,43],[88,54]],[[888,43],[872,54]],[[72,437],[88,426]],[[888,437],[872,426]],
-         [[450,35],[460,45]],[[510,35],[500,45]],[[450,445],[460,435]],[[510,445],[500,435]]].forEach(s => {
-            ctx.beginPath(); ctx.moveTo(s[0][0],s[0][1]); ctx.lineTo(s[1][0],s[1][1]); ctx.stroke();
-        });
+        if (DEBUG_TRONERAS) dibujarDepuracionTroneras();
 
         // Diamantes de referencia incrustados en el marco.
         ctx.fillStyle = '#e8c874'; ctx.strokeStyle = '#4d321a'; ctx.lineWidth = 1;
@@ -917,10 +1113,10 @@
         ballsArr.forEach(entry => {
             if (entry.isPocketed) return;
             const body = entry.body;
-            dibujarBola(body.position.x, body.position.y, body.plugin.numero);
+            dibujarBolaFisica(body, body.plugin.numero);
         });
         dibujarTaco();
-        if (cueBall) dibujarBola(cueBall.position.x, cueBall.position.y, 0);
+        if (cueBall) dibujarBolaFisica(cueBall, 0);
 
         const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
         ctx.fillStyle = 'rgba(255,244,215,0.88)'; ctx.font = '700 11px Inter, Arial'; ctx.textAlign = 'left';
@@ -929,11 +1125,22 @@
 
     // ---- Loop persistente (uno solo, siempre) ----
     let rafId = null;
-    function loopStep() {
+    function loopStep(timestamp) {
         if (document.getElementById('pantalla-juego').classList.contains('activa') && runner && runner.enabled) {
             actualizarGolpe();
+            if (ultimoFrameFisico === null) ultimoFrameFisico = timestamp;
+            acumuladorFisicoMs += Math.min(50, Math.max(0, timestamp - ultimoFrameFisico));
+            ultimoFrameFisico = timestamp;
+            let subpasos = 0;
+            while (acumuladorFisicoMs >= PASO_FISICO_MS && subpasos < 8) {
+                pasoFisicoFijo();
+                acumuladorFisicoMs -= PASO_FISICO_MS;
+                subpasos++;
+            }
             draw();
             revisarSiSeDetuvieron();
+        } else {
+            ultimoFrameFisico = null;
         }
         rafId = requestAnimationFrame(loopStep);
     }
@@ -942,11 +1149,13 @@
     function todasQuietas() {
         const umbral = 0.05;
         if (cueBall) {
+            if (cueBall.plugin && cueBall.plugin.falling) return false;
             const v = cueBall.velocity;
             if (Math.sqrt(v.x * v.x + v.y * v.y) > umbral) return false;
         }
         for (const e of ballsArr) {
             if (e.isPocketed) continue;
+            if (e.body.plugin && e.body.plugin.falling) return false;
             const v = e.body.velocity;
             if (Math.sqrt(v.x * v.x + v.y * v.y) > umbral) return false;
         }
