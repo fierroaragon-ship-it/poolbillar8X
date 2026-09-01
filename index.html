@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Billar Mundial — Pasaporte de Cantina</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --felt-deep: #0d3b2e;
@@ -414,6 +411,77 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+        /* ---- México: acabado arcade horizontal ---- */
+        :root { --mx-green:#07865f; --mx-green-dark:#034b3a; --mx-red:#d9403a; --mx-cream:#fff0ca; --mx-gold:#f4c75b; --night:#03122f; }
+        body, button, select { font-family: "Arial Rounded MT Bold", "Trebuchet MS", Arial, sans-serif; }
+        h1, h2, .display, #info-pais, #llegada-pais { font-family: Impact, "Arial Black", sans-serif; }
+        .pantalla::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.4; background:radial-gradient(circle at 12% 18%,#fff 0 1px,transparent 1.5px),radial-gradient(circle at 84% 24%,#77dfff 0 1px,transparent 1.5px); background-size:91px 83px,137px 121px; }
+        .pantalla > * { position:relative; z-index:2; }
+        .boton { min-height:44px; border:2px solid #fff1bc; border-radius:14px; text-transform:uppercase; letter-spacing:.06em; transform:skew(-2deg); }
+        .boton:focus-visible, button:focus-visible { outline:3px solid #74edff; outline-offset:3px; }
+        #pantalla-inicio { background:radial-gradient(circle at 25% 20%,#1056a0 0,#07295b 34%,#020c25 82%); }
+        #pantalla-inicio::after { content:"★  ★  ★"; position:absolute; bottom:-6vh; left:-2vw; right:-2vw; height:25vh; display:flex; align-items:flex-start; justify-content:center; color:rgba(82,212,244,.12); font-size:18vw; letter-spacing:3vw; transform:rotate(-4deg); }
+        #pantalla-inicio h1 { font-size:clamp(2.6rem,8vw,7.5rem); line-height:.82; letter-spacing:.035em; text-transform:uppercase; -webkit-text-stroke:clamp(1px,.22vw,4px) #052451; filter:drop-shadow(0 8px 0 #e23d3b); }
+        #pantalla-inicio .subtitulo-inicio { font-weight:900; color:var(--mx-gold); letter-spacing:.28em; }
+        #pantalla-inicio #btn-viaje { flex-basis:min(32vw,360px); font-size:clamp(1.05rem,2vw,1.55rem); background:linear-gradient(#ffe87b,#f59a24); }
+        .inicio-secundarios { display:flex; gap:12px; }
+        .inicio-secundarios .boton { width:auto; min-width:145px; }
+        #pantalla-juego { padding:6px max(7px,env(safe-area-inset-right)) 7px max(7px,env(safe-area-inset-left)); background:radial-gradient(circle at 50% 45%,#0b3860,#04162e 74%); }
+        #pantalla-juego::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,var(--mx-green) 0 7px,var(--mx-cream) 7px 13px,var(--mx-red) 13px 20px) top/100% 4px no-repeat; }
+        #pantalla-juego .barra-superior { height:50px; margin:0 0 5px; padding:4px 8px; border:0; background:transparent; box-shadow:none; gap:6px; }
+        .jugador { display:flex; align-items:center; gap:7px; min-width:155px; padding:4px 9px; border:2px solid rgba(255,240,202,.32); border-radius:13px; background:linear-gradient(135deg,rgba(4,79,63,.94),rgba(2,29,46,.94)); color:#fff; }
+        .jugador.rival { flex-direction:row-reverse; text-align:right; background:linear-gradient(225deg,rgba(160,37,43,.92),rgba(2,29,46,.94)); }
+        .avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:50%; background:var(--mx-cream); border:2px solid var(--mx-gold); color:#063e35; font-size:1.1rem; }
+        .jugador strong,.jugador small { display:block; line-height:1.05; }
+        .jugador strong { font-size:.75rem; text-transform:uppercase; }
+        .jugador small { margin-top:3px; font-size:.55rem; color:#ffe589; }
+        .marcador-central { display:flex; align-items:center; justify-content:center; gap:8px; flex:1; min-width:0; }
+        .marcador-central strong { color:#fff; font-size:clamp(.68rem,1.4vw,1rem); white-space:nowrap; }
+        .turno-chip { padding:5px 10px; border-radius:20px; background:var(--mx-gold); color:#07283b; font-size:.62rem; font-weight:900; text-transform:uppercase; white-space:nowrap; }
+        .turno-chip.cambio { animation:turnoFlash .55s ease; }
+        .bolas-asignadas { display:flex; gap:2px; }
+        .mini-bola { width:13px; height:13px; border-radius:50%; border:1px solid #fff7d9; box-shadow:0 1px 2px #000; }
+        .mini-bola:nth-child(1){background:#edbd26}.mini-bola:nth-child(2){background:#2870bf}.mini-bola:nth-child(3){background:#d64339}
+        #btn-pausa { flex:0 0 42px; width:42px; height:42px; border-radius:12px; border:2px solid #78dfef; background:#073c69; color:white; font-size:1.1rem; }
+        .zona-mesa { padding:0 58px 0 0; }
+        .zona-mesa::before,.zona-mesa::after { position:absolute; left:4px; z-index:3; color:var(--mx-cream); pointer-events:none; text-shadow:0 2px #07291f; }
+        .zona-mesa::before { content:"MÉXICO"; top:50%; transform:translateY(-50%) rotate(-90deg); transform-origin:left top; margin-left:7px; font:900 10px Impact,sans-serif; letter-spacing:.2em; }
+        .zona-mesa::after { content:"◆ ✦ ◆"; bottom:3px; font-size:10px; color:var(--mx-gold); }
+        #canvas-juego { border:2px solid var(--mx-gold); border-radius:16px; box-shadow:0 0 0 4px #063f35,0 0 0 7px var(--mx-cream),0 10px 24px rgba(0,0,0,.55); }
+        .barra-potencia { background:linear-gradient(90deg,#033f35,#08795a,#033f35); border-color:var(--mx-gold); }
+        .hud-inferior { grid-template-columns:115px 1fr auto; height:42px; padding-top:5px; }
+        .hud-inferior .boton { min-height:36px; padding:5px 10px; }
+        #btn-salir-juego { width:110px; }
+        .selector-impacto span { color:#fff0ca; }
+        .evento-juego { position:absolute; left:50%; top:48%; z-index:9; transform:translate(-50%,-50%) scale(.75); opacity:0; pointer-events:none; padding:9px 18px; border:2px solid #fff1c1; border-radius:12px; background:linear-gradient(135deg,#07865f,#045b48); color:#fff; font:900 clamp(.85rem,2vw,1.3rem) Impact,sans-serif; letter-spacing:.12em; text-shadow:0 2px #063d32; }
+        .evento-juego.visible { animation:eventoArcade .85s ease both; }
+        @keyframes eventoArcade { 0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}25%,70%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:0;transform:translate(-50%,-60%) scale(1)} }
+        @keyframes turnoFlash { 50%{transform:scale(1.14);box-shadow:0 0 18px #ffe269} }
+        #pantalla-resultado { text-align:center; background:radial-gradient(circle at 50% 38%,#0b4772,#03142e 72%); }
+        .resultado-tarjeta { width:min(700px,90vw); padding:clamp(18px,4vh,42px); border:3px solid var(--mx-gold); border-radius:24px; background:linear-gradient(145deg,rgba(4,94,72,.96),rgba(3,31,55,.97)); box-shadow:0 0 0 7px rgba(255,240,202,.12),0 20px 50px rgba(0,0,0,.45); }
+        .resultado-bandera { font-size:clamp(2rem,7vh,4.2rem); }
+        #resultado-titulo { margin:4px 0; color:#fff4c7; font-size:clamp(2.1rem,7vh,5rem); text-shadow:0 5px #ba3033; text-transform:uppercase; }
+        .resultado-pais { color:#8ff5df; font-weight:900; letter-spacing:.25em; }
+        .recompensa { margin:10px auto 16px; color:var(--mx-gold); font-size:clamp(1rem,2.5vw,1.45rem); }
+        .resultado-acciones { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; }
+        .resultado-acciones .boton { width:auto; min-width:210px; margin:0; }
+        #pantalla-pausa .boton,#pantalla-config .boton,#pantalla-coleccion .boton { width:min(300px,70vw)!important; }
+        @media (max-height:390px) and (orientation:landscape) {
+            #pantalla-inicio { flex-wrap:nowrap!important; padding:10px 20px; }
+            #pantalla-inicio h1 { flex:0 1 42%; font-size:clamp(2.2rem,10vh,4rem); }
+            #pantalla-inicio .subtitulo-inicio { display:none; }
+            #pantalla-inicio #btn-viaje { flex:0 0 22%; min-width:125px; }
+            .inicio-secundarios { flex-direction:column; gap:7px; }
+            .inicio-secundarios .boton { min-height:38px; padding:7px 12px; font-size:.7rem; }
+            #pantalla-juego .barra-superior { height:42px; }
+            .avatar { width:28px;height:28px }.jugador{min-width:125px;padding:2px 6px}.jugador small{display:none}
+            .hud-inferior { height:36px }.hud-inferior .boton{min-height:31px}.selector-impacto{font-size:.48rem}#bola-impacto{width:28px;height:28px}
+            #canvas-juego { max-height:calc(100vh - 91px); width:min(100%,calc((100vh - 91px)*2)); }
+            .barra-potencia { height:68%; min-height:112px; }
+            .resultado-tarjeta { display:grid; grid-template-columns:90px 1fr; align-items:center; padding:12px 18px; }
+            .resultado-bandera { grid-row:1/4 }.resultado-acciones { grid-column:1/3 }.recompensa{margin:4px}
+        }
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
     </style>
 </head>
 <body>
@@ -423,11 +491,13 @@
         </div>
         <!-- ===== INICIO ===== -->
         <div id="pantalla-inicio" class="pantalla activa">
-            <h1>Billar Mundial</h1>
-            <p class="subtitulo-inicio">10 países · un taco · un pasaporte</p>
-            <button class="boton" id="btn-viaje">✈️ Viaje Mundial</button>
-            <button class="boton boton-secundario" id="btn-coleccion">🏆 Colección</button>
-            <button class="boton boton-secundario" id="btn-config">⚙️ Configuración</button>
+            <h1>BILLAR<br>MUNDIAL</h1>
+            <p class="subtitulo-inicio">La gira comienza en México</p>
+            <button class="boton" id="btn-viaje">JUGAR</button>
+            <div class="inicio-secundarios">
+                <button class="boton boton-secundario" id="btn-coleccion">🏆 Progreso</button>
+                <button class="boton boton-secundario" id="btn-config">⚙ Ajustes</button>
+            </div>
         </div>
 
         <!-- ===== MAPA ===== -->
@@ -466,13 +536,14 @@
         <!-- ===== JUEGO ===== -->
         <div id="pantalla-juego" class="pantalla">
             <div class="barra-superior">
-                <span id="juego-info">🇲🇽 Nivel 1</span>
-                <span id="juego-tiros">🔫 25</span>
-                <span id="juego-monedas">💰 0</span>
-                <button id="btn-pausa" style="background:none; border:none; color:white; font-size:1.5rem;">⏸</button>
+                <div class="jugador"><span class="avatar">😎</span><span><strong>Tú</strong><small>● ● ● · LISAS</small></span><span class="bolas-asignadas" aria-label="Bolas lisas"><i class="mini-bola"></i><i class="mini-bola"></i><i class="mini-bola"></i></span></div>
+                <div class="marcador-central"><strong id="juego-info">🇲🇽 1/10</strong><span id="turno-chip" class="turno-chip">TU TURNO</span><strong id="juego-tiros">25 tiros</strong><span id="juego-monedas" class="oculto">0</span></div>
+                <div class="jugador rival"><span class="avatar">🤠</span><span><strong>El Catrín</strong><small>● ● ● · RAYADAS</small></span></div>
+                <button id="btn-pausa" aria-label="Pausar">Ⅱ</button>
             </div>
             <div class="zona-mesa">
                 <canvas id="canvas-juego" width="960" height="480" aria-label="Mesa de Billar Mundial"></canvas>
+                <div id="evento-juego" class="evento-juego" aria-live="polite"></div>
                 <div id="barra-potencia" class="barra-potencia" role="slider" aria-label="Potencia del tiro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
                     <span class="potencia-titulo">POTENCIA</span>
                     <div class="potencia-canal"><div class="potencia-carga"></div></div>
@@ -497,6 +568,20 @@
                 <h2>Sin tiros</h2>
                 <p>Inténtalo de nuevo</p>
                 <button class="boton" id="btn-gameover-continuar" style="width:auto; padding:10px 30px;">Reintentar</button>
+            </div>
+        </div>
+
+        <!-- ===== RESULTADO ===== -->
+        <div id="pantalla-resultado" class="pantalla">
+            <div class="resultado-tarjeta">
+                <div class="resultado-bandera">🇲🇽</div>
+                <h2 id="resultado-titulo">¡VICTORIA!</h2>
+                <p class="resultado-pais">MÉXICO · NIVEL <span id="resultado-nivel">1</span></p>
+                <p id="resultado-recompensa" class="recompensa">★ +10 MONEDAS</p>
+                <div class="resultado-acciones">
+                    <button class="boton boton-secundario" id="btn-resultado-mapa">VOLVER AL MAPA</button>
+                    <button class="boton" id="btn-resultado-repetir">JUGAR DE NUEVO</button>
+                </div>
             </div>
         </div>
 
@@ -534,7 +619,7 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="matter.min.js"></script>
     <script>
     // ============================================================
     //  BILLAR MUNDIAL — versión corregida y estable
@@ -593,6 +678,17 @@
     const potenciaValor = document.getElementById('potencia-valor');
     const bolaImpacto = document.getElementById('bola-impacto');
     const puntoImpacto = document.getElementById('punto-impacto');
+    const eventoJuego = document.getElementById('evento-juego');
+    const turnoChip = document.getElementById('turno-chip');
+    let ultimoResultadoVictoria = false;
+
+    function anunciarEvento(texto, tipo = '') {
+        eventoJuego.textContent = texto;
+        eventoJuego.dataset.tipo = tipo;
+        eventoJuego.classList.remove('visible');
+        void eventoJuego.offsetWidth;
+        eventoJuego.classList.add('visible');
+    }
 
     const MESA_W = 960;
     const MESA_H = 480;
@@ -800,6 +896,7 @@
             distanciaCentro: Number(validacion.distancia.toFixed(3)),
             velocidadInterior: Number(validacion.velocidadInterior.toFixed(3))
         });
+        anunciarEvento(ball === cueBall ? 'FALTA · BOLA BLANCA' : '¡EMBOCADA!', ball === cueBall ? 'falta' : 'embocada');
     }
 
     function evaluarTroneras() {
@@ -1162,13 +1259,13 @@
         const w = MESA_W, h = MESA_H;
         ctx.clearRect(0, 0, w, h);
 
-        // Marco exterior de nogal con volumen propio de Billar Mundial.
+        // Marco mexicano: acabado esmaltado verde, crema y oro, sin alterar la geometría.
         const madera = ctx.createLinearGradient(0, 0, 0, h);
-        madera.addColorStop(0, '#9b6235'); madera.addColorStop(0.08, '#4a2817');
-        madera.addColorStop(0.5, '#6a3b20'); madera.addColorStop(0.92, '#32190f'); madera.addColorStop(1, '#140b08');
+        madera.addColorStop(0, '#fff0ca'); madera.addColorStop(0.055, '#e7bd58');
+        madera.addColorStop(0.12, '#087057'); madera.addColorStop(0.88, '#034737'); madera.addColorStop(0.95, '#d9a83f'); madera.addColorStop(1, '#fff0ca');
         ctx.fillStyle = madera; ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = 'rgba(244,213,143,0.38)'; ctx.lineWidth = 3; ctx.strokeRect(3, 3, w - 6, h - 6);
-        ctx.strokeStyle = 'rgba(8,3,2,0.68)'; ctx.lineWidth = 5; ctx.strokeRect(19, 18, w - 38, h - 36);
+        ctx.strokeStyle = 'rgba(255,240,202,0.9)'; ctx.lineWidth = 3; ctx.strokeRect(3, 3, w - 6, h - 6);
+        ctx.strokeStyle = '#bd3434'; ctx.lineWidth = 5; ctx.strokeRect(19, 18, w - 38, h - 36);
 
         const fieltro = ctx.createRadialGradient(w * 0.46, h * 0.42, 30, w / 2, h / 2, w * 0.58);
         fieltro.addColorStop(0, '#218665'); fieltro.addColorStop(0.58, '#126348'); fieltro.addColorStop(1, '#073728');
@@ -1180,7 +1277,7 @@
         pockets.forEach(p => {
             const r = p.circleRadius;
             const pg = ctx.createRadialGradient(p.position.x - 3, p.position.y - 3, 2, p.position.x, p.position.y, r);
-            pg.addColorStop(0, '#000'); pg.addColorStop(0.62, '#050706'); pg.addColorStop(0.8, '#23140d'); pg.addColorStop(1, '#6f4728');
+            pg.addColorStop(0, '#000'); pg.addColorStop(0.62, '#050706'); pg.addColorStop(0.8, '#052c24'); pg.addColorStop(1, '#e2b851');
             ctx.beginPath(); ctx.arc(p.position.x, p.position.y, r, 0, Math.PI * 2); ctx.fillStyle = pg; ctx.fill();
             ctx.strokeStyle = 'rgba(238,190,101,0.32)'; ctx.lineWidth = 1.5; ctx.stroke();
         });
@@ -1206,6 +1303,14 @@
         [134,240,346].forEach(y => {
             [[14,y],[946,y]].forEach(([dx,dy]) => { ctx.save(); ctx.translate(dx,dy); ctx.rotate(Math.PI/4); ctx.fillRect(-3,-3,6,6); ctx.strokeRect(-3,-3,6,6); ctx.restore(); });
         });
+
+        // Detalles decorativos solo sobre el marco, fuera del paño jugable.
+        ctx.save();
+        ctx.fillStyle = '#fff0ca'; ctx.font = '900 13px Impact, Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('MÉXICO', w / 2, 16);
+        ctx.fillStyle = '#d9403a';
+        for (let x = 250; x <= 710; x += 46) { ctx.beginPath(); ctx.moveTo(x, 469); ctx.lineTo(x + 8, 477); ctx.lineTo(x + 16, 469); ctx.fill(); }
+        ctx.restore();
 
         dibujarGuia();
 
@@ -1267,6 +1372,10 @@
         esperandoResultado = false;
         puedeDisparar = true;
         actualizarBarraPotencia(0);
+        turnoChip.classList.remove('cambio');
+        void turnoChip.offsetWidth;
+        turnoChip.classList.add('cambio');
+        anunciarEvento('TU TURNO', 'turno');
 
         const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
         if (bolasVivas === 0) {
@@ -1283,16 +1392,25 @@
         juegoMonedas.textContent = `💰 ${monedasTotales}`;
         const prog = progreso[paisActual];
         prog.nivelesCompletados = Math.max(prog.nivelesCompletados, nivelActual);
+        if (paisActual === 0) prog.nivelesCompletados = NIVELES_POR_PAIS;
         if (nivelActual >= NIVELES_POR_PAIS && paisActual + 1 < paises.length) {
             progreso[paisActual + 1].unlocked = true;
         }
-        document.getElementById('texto-fin-nivel').textContent = `Has ganado ${monedasGanadas} monedas`;
-        document.getElementById('mensaje-fin-nivel').classList.remove('oculto');
+        mostrarResultado(true, monedasGanadas);
     }
 
     function perderNivel() {
         puedeDisparar = false;
-        document.getElementById('mensaje-gameover').classList.remove('oculto');
+        mostrarResultado(false, 0);
+    }
+
+    function mostrarResultado(victoria, recompensa) {
+        ultimoResultadoVictoria = victoria;
+        if (runner) runner.enabled = false;
+        document.getElementById('resultado-titulo').textContent = victoria ? '¡VICTORIA!' : 'DERROTA';
+        document.getElementById('resultado-nivel').textContent = nivelActual;
+        document.getElementById('resultado-recompensa').textContent = victoria ? `★ +${recompensa} MONEDAS` : '★ INTÉNTALO DE NUEVO';
+        mostrarPantalla('pantalla-resultado');
     }
 
     // ---- Iniciar un nivel ----
@@ -1307,8 +1425,8 @@
         cargandoPotencia = false;
         golpeAnim = null;
 
-        juegoInfo.textContent = `${paises[paisIdx].bandera} ${paises[paisIdx].nombre} Nivel ${nivel}/${NIVELES_POR_PAIS}`;
-        juegoTiros.textContent = `🔫 ${tirosRestantes}`;
+        juegoInfo.textContent = `${paises[paisIdx].bandera} ${nivel}/${NIVELES_POR_PAIS}`;
+        juegoTiros.textContent = `${tirosRestantes} TIROS`;
         juegoMonedas.textContent = `💰 ${monedasTotales}`;
 
         document.getElementById('mensaje-fin-nivel').classList.add('oculto');
@@ -1421,7 +1539,7 @@
         medicionColision = null;
         Matter.Body.setVelocity(cueBall, velocidad);
         tirosRestantes--;
-        juegoTiros.textContent = `🔫 ${tirosRestantes}`;
+        juegoTiros.textContent = `${tirosRestantes} TIROS`;
         esperandoResultado = true;
         actualizarBarraPotencia(0);
     }
@@ -1520,6 +1638,16 @@
     };
     document.getElementById('btn-gameover-continuar').onclick = () => {
         document.getElementById('mensaje-gameover').classList.add('oculto');
+        iniciarNivel(paisActual, nivelActual);
+    };
+    document.getElementById('btn-resultado-mapa').onclick = () => {
+        paisSeleccionado = paisActual;
+        actualizarMapa();
+        mostrarPantalla('pantalla-mapa');
+        iniciarAnimacionMapa();
+    };
+    document.getElementById('btn-resultado-repetir').onclick = () => {
+        mostrarPantalla('pantalla-juego');
         iniciarNivel(paisActual, nivelActual);
     };
 
@@ -1658,28 +1786,34 @@
     }
 
     function dibujarAvion(pos, angulo, escala) {
+        const anchoBase = Math.max(42, Math.min(canvasMapa.getBoundingClientRect().width * 0.08, 100));
+        const ancho = anchoBase * escala;
         ctxMapa.save();
         ctxMapa.translate(pos.x, pos.y);
         ctxMapa.rotate(angulo);
-        ctxMapa.shadowColor = 'rgba(244,202,100,0.75)';
-        ctxMapa.shadowBlur = 9;
+        ctxMapa.globalAlpha = 1;
+        ctxMapa.shadowColor = 'rgba(255,224,105,0.95)';
+        ctxMapa.shadowBlur = Math.max(8, ancho * 0.16);
         if (recursosMapa.avion) {
-            const ancho = 44 * escala;
             const alto = ancho * (recursosMapa.avion.naturalHeight / recursosMapa.avion.naturalWidth);
             ctxMapa.drawImage(recursosMapa.avion, -ancho / 2, -alto / 2, ancho, alto);
             ctxMapa.restore();
             return;
         }
-        ctxMapa.scale(escala, escala);
+        // Fallback deliberadamente contrastado mientras carga o si falla el PNG.
+        const escalaFallback = ancho / 36;
+        ctxMapa.scale(escalaFallback, escalaFallback);
         ctxMapa.fillStyle = '#fff7df';
-        ctxMapa.strokeStyle = '#704f1e';
-        ctxMapa.lineWidth = 0.8;
+        ctxMapa.strokeStyle = '#ef4b2f';
+        ctxMapa.lineWidth = 1.8;
         ctxMapa.beginPath();
         ctxMapa.moveTo(12, 0); ctxMapa.lineTo(-8, -3); ctxMapa.lineTo(-14, -11);
         ctxMapa.lineTo(-17, -10); ctxMapa.lineTo(-13, -1); ctxMapa.lineTo(-18, 0);
         ctxMapa.lineTo(-13, 1); ctxMapa.lineTo(-17, 10); ctxMapa.lineTo(-14, 11);
         ctxMapa.lineTo(-8, 3); ctxMapa.closePath();
         ctxMapa.fill(); ctxMapa.stroke();
+        ctxMapa.fillStyle = '#19a9e5';
+        ctxMapa.beginPath(); ctxMapa.arc(7, 0, 2.2, 0, Math.PI * 2); ctxMapa.fill();
         ctxMapa.restore();
     }
 
@@ -1791,9 +1925,12 @@
         if (viajeEnCurso) {
             const t = viajeEnCurso.progreso;
             const pos = puntoRuta(origen, control, destino, t);
-            const siguiente = puntoRuta(origen, control, destino, Math.min(1, t + 0.012));
-            const angulo = Math.atan2(siguiente.y - pos.y, siguiente.x - pos.x) + Math.sin(t * Math.PI) * 0.12;
-            const escalaVuelo = 0.62 + Math.sin(t * Math.PI) * 0.28 - Math.max(0, t - 0.82) * 0.35;
+            const tangente = {
+                x: 2 * (1 - t) * (control.x - origen.x) + 2 * t * (destino.x - control.x),
+                y: 2 * (1 - t) * (control.y - origen.y) + 2 * t * (destino.y - control.y)
+            };
+            const angulo = Math.atan2(tangente.y, tangente.x) + Math.sin(t * Math.PI) * 0.12;
+            const escalaVuelo = 0.96 + Math.sin(t * Math.PI) * 0.08 - Math.max(0, t - 0.82) * 0.1;
             dibujarAvion(pos, angulo, escalaVuelo);
         }
     }
