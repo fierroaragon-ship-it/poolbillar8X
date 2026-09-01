@@ -24,27 +24,25 @@
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Inter', sans-serif;
-            background: radial-gradient(ellipse at 50% 0%, #16281f 0%, #060f0b 70%);
+            background: #020918;
             color: var(--parchment);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 100dvh;
             overflow: hidden;
         }
         h1, h2, .display { font-family: 'Fraunces', serif; }
         #app {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            max-height: 800px;
-            background:
-                linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)),
-                repeating-linear-gradient(115deg, var(--wood) 0 3px, var(--wood-light) 3px 6px);
-            border-radius: 22px;
+            width: 100vw;
+            height: 100dvh;
+            max-width: none;
+            max-height: none;
+            background: #04142b;
+            border-radius: 0;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 0 8px var(--wood), 0 0 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.5);
+            box-shadow: none;
         }
         .pantalla {
             width: 100%;
@@ -125,6 +123,16 @@
             box-shadow: 0 0 0 1px rgba(232,200,116,0.35), inset 0 0 34px rgba(0,0,0,0.65), 0 12px 28px rgba(0,0,0,0.35);
         }
         #lienzo-mapa { width: 100%; height: 100%; display: block; touch-action: manipulation; cursor: pointer; }
+        .mapa-cargando {
+            position: absolute; inset: 0; z-index: 12; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 9px;
+            background: linear-gradient(145deg, rgba(8,28,38,0.98), rgba(20,63,66,0.98));
+            color: var(--gold-bright); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+            transition: opacity 0.25s ease;
+        }
+        .mapa-cargando.oculto-carga { opacity: 0; pointer-events: none; }
+        .mapa-cargando::before { content: '◌'; font-size: 2rem; animation: girarCarga 0.8s linear infinite; }
+        @keyframes girarCarga { to { transform: rotate(360deg); } }
         .mapa-leyenda {
             position: absolute; left: 8px; bottom: 7px; z-index: 3;
             display: flex; gap: 8px; padding: 5px 7px;
@@ -193,9 +201,13 @@
         }
         #info-pais { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.15rem; }
         #info-nivel { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
+        #info-saludo { color: var(--stamp-red); font-weight: 800; font-size: 0.7rem; letter-spacing: 0.1em; margin-top: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            .mapa-cargando::before, .mapa-anuncio-tarjeta { animation: none; transition: none; }
+        }
         .saludo-bienvenida { font-size: 2.8rem; font-weight: 900; font-family: 'Fraunces', serif; color: var(--gold-bright); text-shadow: 0 0 30px rgba(232,200,116,0.8); animation: latido 1s infinite alternate; }
         @keyframes latido { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
-        #app.modo-juego { max-width: 100vw; max-height: 100vh; border-radius: 0; box-shadow: none; }
+        #app.modo-juego { max-width: none; max-height: none; border-radius: 0; box-shadow: none; }
         #pantalla-juego { padding: 7px 10px 8px; justify-content: flex-start; }
         #pantalla-juego .barra-superior { flex: 0 0 auto; margin-bottom: 5px; padding: 6px 14px; }
         .zona-mesa {
@@ -317,6 +329,88 @@
             .info-viaje { padding: 8px 20px; margin: 3px 0; }
             #btn-jugar-pais { padding: 11px 32px; margin: 5px; }
         }
+        /* ---- Billar Mundial: experiencia landscape a pantalla completa ---- */
+        html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #020918; }
+        body { min-height: 100dvh; align-items: stretch; }
+        #app, #app.modo-juego {
+            width: 100vw; height: 100dvh; max-width: none; max-height: none;
+            border-radius: 0; box-shadow: none; background: #04142b;
+        }
+        .pantalla {
+            padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+                     max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+            background:
+                repeating-linear-gradient(0deg, rgba(74,211,224,0.022) 0 1px, transparent 1px 5px),
+                radial-gradient(circle at 50% 35%, #0b3c69 0%, #061b3a 55%, #020a1b 100%);
+        }
+        #pantalla-inicio.activa { flex-flow: row wrap; align-content: center; gap: clamp(8px, 2vw, 24px); }
+        #pantalla-inicio h1, #pantalla-inicio .subtitulo-inicio { flex: 0 0 100%; }
+        #pantalla-inicio h1 { color: #f7fbff; text-shadow: 0 0 8px #22bdd2, 0 0 28px rgba(31,132,244,0.7); }
+        #pantalla-inicio .subtitulo-inicio { margin: 0 0 8px; color: #8fe9f5; opacity: 0.85; }
+        #pantalla-inicio > .boton { width: min(27vw, 280px); margin: 0; }
+        .boton { background: linear-gradient(180deg, #ffb24a, #ef741e); color: #071425; box-shadow: 0 4px 0 #9a3e13, 0 7px 18px rgba(0,0,0,0.42); }
+        .boton-secundario { background: linear-gradient(180deg, #147aaa, #074477); color: #f5fbff; box-shadow: 0 4px 0 #032c51, 0 7px 18px rgba(0,0,0,0.42); }
+        .barra-superior, .config-item, #lista-coleccion, .mensaje-flotante {
+            background: rgba(3,24,53,0.88); color: #f5fbff;
+            border-color: rgba(105,220,244,0.62); box-shadow: 0 7px 24px rgba(0,0,0,0.35), inset 0 0 16px rgba(30,145,211,0.1);
+        }
+        h2, .barra-superior { color: #92edff; }
+        .mensaje-flotante h2, .desbloqueado { color: #ff9b3e; }
+
+        #pantalla-mapa { padding: 0; background: #06438b; overflow: hidden; }
+        #pantalla-mapa::after {
+            content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background: repeating-linear-gradient(0deg, rgba(120,225,255,0.025) 0 1px, transparent 1px 5px);
+        }
+        #pantalla-mapa .mapa-container {
+            position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
+            max-height: none; min-height: 0; aspect-ratio: auto; margin: 0; border: 0; border-radius: 0;
+            background: #06438b; box-shadow: none;
+        }
+        #pantalla-mapa .barra-superior {
+            position: absolute; z-index: 6; top: max(8px, env(safe-area-inset-top));
+            left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right));
+            width: auto; margin: 0; padding: 7px 12px; border-radius: 11px;
+            background: rgba(1,20,48,0.76); backdrop-filter: blur(5px);
+        }
+        #pantalla-mapa .info-viaje {
+            position: absolute; z-index: 6; left: max(12px, env(safe-area-inset-left));
+            bottom: max(12px, env(safe-area-inset-bottom)); width: auto; min-width: 150px; max-width: 34vw;
+            margin: 0; padding: 8px 16px; border: 1px solid rgba(117,224,244,0.68); border-radius: 11px;
+            background: rgba(2,22,54,0.82); color: #f5fbff; backdrop-filter: blur(5px);
+        }
+        #pantalla-mapa .info-viaje::before { background: linear-gradient(90deg, #1cc8df, #ff8c30); }
+        #pantalla-mapa #info-pais { color: #fff; }
+        #pantalla-mapa #info-saludo { color: #ff9b3e; }
+        #pantalla-mapa #btn-jugar-pais {
+            position: absolute; z-index: 6; right: max(12px, env(safe-area-inset-right));
+            bottom: max(12px, env(safe-area-inset-bottom)); width: auto; min-width: 170px; margin: 0; padding: 11px 22px;
+        }
+        #pantalla-mapa .nav-mapa { z-index: 6; width: 40px; height: 52px; border-radius: 10px; background: rgba(2,27,65,0.78); border-color: #69d9ee; color: #fff; }
+        #pantalla-mapa #btn-mapa-prev { left: max(7px, env(safe-area-inset-left)); }
+        #pantalla-mapa #btn-mapa-next { right: max(7px, env(safe-area-inset-right)); }
+        #pantalla-mapa .mapa-leyenda { left: 50%; bottom: max(8px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 5; }
+        #pantalla-mapa .mapa-cargando { background: linear-gradient(145deg, #062b61, #075b8c); }
+
+        #aviso-landscape {
+            display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center;
+            padding: 28px; text-align: center; background: radial-gradient(circle at 50% 42%, #0b4b78, #020a1b 74%);
+            color: #f5fbff;
+        }
+        #aviso-landscape .icono-girar { color: #7feaff; }
+        #aviso-landscape strong { display: block; color: #fff; font: 800 1.25rem 'Fraunces', serif; }
+        #aviso-landscape .icono-girar { display: block; margin-bottom: 18px; font-size: 3rem; animation: girarTelefono 1.8s ease-in-out infinite; }
+        @media (orientation: portrait) {
+            #aviso-landscape { display: flex; }
+            #pantalla-juego.activa .aviso-orientacion { display: none; }
+        }
+        @media (max-height: 390px) and (orientation: landscape) {
+            #pantalla-inicio h1 { font-size: clamp(1.7rem, 7vh, 2.5rem); }
+            #pantalla-inicio > .boton { padding: 10px 16px; font-size: 0.88rem; }
+            #pantalla-mapa .barra-superior { padding: 5px 10px; }
+            #pantalla-mapa .info-viaje { padding: 6px 12px; }
+            #pantalla-mapa #btn-jugar-pais { padding: 9px 18px; }
+        }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
@@ -324,6 +418,9 @@
 </head>
 <body>
     <div id="app">
+        <div id="aviso-landscape" aria-live="polite">
+            <div><span class="icono-girar" aria-hidden="true">📱</span><strong>Gira tu dispositivo para jugar</strong></div>
+        </div>
         <!-- ===== INICIO ===== -->
         <div id="pantalla-inicio" class="pantalla activa">
             <h1>Billar Mundial</h1>
@@ -342,6 +439,7 @@
             </div>
             <div class="mapa-container">
                 <canvas id="lienzo-mapa" aria-label="Mapamundi interactivo de destinos"></canvas>
+                <div id="mapa-cargando" class="mapa-cargando"><span>Preparando Gira Mundial</span></div>
                 <button class="nav-mapa" id="btn-mapa-prev" aria-label="País anterior">◀</button>
                 <button class="nav-mapa" id="btn-mapa-next" aria-label="País siguiente">▶</button>
                 <div class="mapa-leyenda" aria-hidden="true">
@@ -359,6 +457,7 @@
             </div>
             <div class="info-viaje">
                 <p id="info-pais">🇲🇽 México</p>
+                <p id="info-saludo">¡HOLA!</p>
                 <p id="info-nivel">Nivel 1/10</p>
             </div>
             <button class="boton" id="btn-jugar-pais">✈️ Viajar y jugar</button>
@@ -452,16 +551,16 @@
     // ============================================================
 
     const paises = [
-        { nombre: 'México', bandera: '🇲🇽', saludo: '¡HOLA!', lon: -102, lat: 23, etiqueta: [-4, 18] },
-        { nombre: 'Canadá', bandera: '🇨🇦', saludo: 'HELLO!', lon: -106, lat: 57, etiqueta: [-18, -19] },
-        { nombre: 'Estados Unidos', bandera: '🇺🇸', saludo: 'HEY!', lon: -98, lat: 39, etiqueta: [24, -3] },
-        { nombre: 'Holanda', bandera: '🇳🇱', saludo: 'HALLO!', lon: 5.3, lat: 52.1, etiqueta: [-49, -29] },
-        { nombre: 'Alemania', bandera: '🇩🇪', saludo: 'HALLO!', lon: 10.4, lat: 51.1, etiqueta: [5, -32] },
-        { nombre: 'Suiza', bandera: '🇨🇭', saludo: 'GRÜEZI!', lon: 8.2, lat: 46.8, etiqueta: [-47, 7] },
-        { nombre: 'Letonia', bandera: '🇱🇻', saludo: 'SVEIKI!', lon: 24.6, lat: 57, etiqueta: [49, -22] },
-        { nombre: 'Noruega', bandera: '🇳🇴', saludo: 'HEI!', lon: 8.5, lat: 61, etiqueta: [30, -51] },
-        { nombre: 'Italia', bandera: '🇮🇹', saludo: 'CIAO!', lon: 12.5, lat: 42.8, etiqueta: [-3, 29] },
-        { nombre: 'Grecia', bandera: '🇬🇷', saludo: 'YASSOU!', lon: 22, lat: 39, etiqueta: [48, 24] }
+        { nombre: 'México', bandera: '🇲🇽', saludo: '¡HOLA!', lon: -102, lat: 23, mapX: 0.20, mapY: 0.52, etiqueta: [-4, 18] },
+        { nombre: 'Canadá', bandera: '🇨🇦', saludo: 'HELLO!', lon: -106, lat: 57, mapX: 0.18, mapY: 0.27, etiqueta: [-18, -19] },
+        { nombre: 'Estados Unidos', bandera: '🇺🇸', saludo: 'HEY!', lon: -98, lat: 39, mapX: 0.19, mapY: 0.40, etiqueta: [24, -3] },
+        { nombre: 'Holanda', bandera: '🇳🇱', saludo: 'HALLO!', lon: 5.3, lat: 52.1, mapX: 0.495, mapY: 0.335, etiqueta: [-49, -29] },
+        { nombre: 'Alemania', bandera: '🇩🇪', saludo: 'HALLO!', lon: 10.4, lat: 51.1, mapX: 0.515, mapY: 0.35, etiqueta: [5, -32] },
+        { nombre: 'Suiza', bandera: '🇨🇭', saludo: 'GRÜEZI!', lon: 8.2, lat: 46.8, mapX: 0.505, mapY: 0.39, etiqueta: [-47, 7] },
+        { nombre: 'Letonia', bandera: '🇱🇻', saludo: 'SVEIKI!', lon: 24.6, lat: 57, mapX: 0.55, mapY: 0.30, etiqueta: [49, -22] },
+        { nombre: 'Noruega', bandera: '🇳🇴', saludo: 'HEI!', lon: 8.5, lat: 61, mapX: 0.50, mapY: 0.24, etiqueta: [30, -51] },
+        { nombre: 'Italia', bandera: '🇮🇹', saludo: 'CIAO!', lon: 12.5, lat: 42.8, mapX: 0.52, mapY: 0.43, etiqueta: [-3, 29] },
+        { nombre: 'Grecia', bandera: '🇬🇷', saludo: 'YASSOU!', lon: 22, lat: 39, mapX: 0.56, mapY: 0.44, etiqueta: [48, 24] }
     ];
     const NIVELES_POR_PAIS = 10;
     const BOLAS_POR_NIVEL = [6,7,8,9,10,10,12,13,15,15]; // más bolas = más difícil
@@ -1350,7 +1449,7 @@
 
     // ---- Navegación entre pantallas ----
     function mostrarPantalla(id) {
-        if (id !== 'pantalla-mapa') cancelarViaje();
+        if (id !== 'pantalla-mapa') { cancelarViaje(); detenerAnimacionMapa(); }
         document.getElementById('app').classList.toggle('modo-juego', id === 'pantalla-juego');
         if (id !== 'pantalla-juego') {
             apuntando = false;
@@ -1360,7 +1459,7 @@
         document.getElementById(id).classList.add('activa');
     }
 
-    document.getElementById('btn-viaje').onclick = () => { mostrarPantalla('pantalla-mapa'); actualizarMapa(); };
+    document.getElementById('btn-viaje').onclick = abrirMapaMundial;
     document.getElementById('btn-volver-inicio-mapa').onclick = () => mostrarPantalla('pantalla-inicio');
 
     document.getElementById('btn-mapa-prev').onclick = () => {
@@ -1469,11 +1568,39 @@
     const btnJugarPais = document.getElementById('btn-jugar-pais');
     const btnMapaPrev = document.getElementById('btn-mapa-prev');
     const btnMapaNext = document.getElementById('btn-mapa-next');
+    const mapaCargando = document.getElementById('mapa-cargando');
+    const movimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const rutasRecursosMapa = {
+        mundo: 'assets/map/world-map-retro.png',
+        avion: 'assets/map/plane-retro.png',
+        mexico: 'assets/countries/mexico/mexico-landmark.png'
+    };
+    const recursosMapa = {};
+    const recursosFallidos = new Set();
     let regionesMarcadores = [];
     let viajeEnCurso = null;
     let vueloFrame = 0;
+    let mapaIdleFrame = 0;
     let viajeTemporizadores = [];
     let viajeToken = 0;
+    let recursosMapaListos = false;
+    let seleccionMapaInicio = performance.now();
+
+    function precargarRecursoMapa(nombre, ruta) {
+        return new Promise(resolve => {
+            const imagen = new Image();
+            imagen.onload = () => { recursosMapa[nombre] = imagen; resolve(true); };
+            imagen.onerror = () => {
+                recursosFallidos.add(nombre);
+                console.error(`[Gira Mundial] No se pudo cargar: ${ruta}`);
+                resolve(false);
+            };
+            imagen.src = ruta;
+        });
+    }
+
+    const promesaRecursosMapa = Promise.all(Object.entries(rutasRecursosMapa).map(([nombre, ruta]) => precargarRecursoMapa(nombre, ruta)))
+        .then(() => { recursosMapaListos = true; return recursosFallidos.size === 0; });
 
     // Siluetas originales simplificadas en coordenadas geográficas.
     const continentes = [
@@ -1487,12 +1614,27 @@
     ];
 
     function proyectar(lon, lat, w, h) {
-        const margenX = Math.max(10, w * 0.025);
-        const margenY = Math.max(8, h * 0.04);
+        const bounds = obtenerBoundsMapa(w, h);
         return {
-            x: margenX + ((lon + 180) / 360) * (w - margenX * 2),
-            y: margenY + ((90 - lat) / 180) * (h - margenY * 2)
+            x: bounds.x + ((lon + 180) / 360) * bounds.width,
+            y: bounds.y + ((90 - lat) / 180) * bounds.height
         };
+    }
+
+    function posicionPais(pais, w, h) {
+        const bounds = obtenerBoundsMapa(w, h);
+        return {
+            x: bounds.x + pais.mapX * bounds.width,
+            y: bounds.y + pais.mapY * bounds.height
+        };
+    }
+
+    function obtenerBoundsMapa(w, h) {
+        const imagen = recursosMapa.mundo;
+        const proporcion = imagen ? imagen.naturalWidth / imagen.naturalHeight : 1672 / 941;
+        const width = Math.min(w, h * proporcion);
+        const height = width / proporcion;
+        return { x: (w - width) / 2, y: (h - height) / 2, width, height };
     }
 
     function puntoRuta(origen, control, destino, t) {
@@ -1519,9 +1661,16 @@
         ctxMapa.save();
         ctxMapa.translate(pos.x, pos.y);
         ctxMapa.rotate(angulo);
-        ctxMapa.scale(escala, escala);
         ctxMapa.shadowColor = 'rgba(244,202,100,0.75)';
         ctxMapa.shadowBlur = 9;
+        if (recursosMapa.avion) {
+            const ancho = 44 * escala;
+            const alto = ancho * (recursosMapa.avion.naturalHeight / recursosMapa.avion.naturalWidth);
+            ctxMapa.drawImage(recursosMapa.avion, -ancho / 2, -alto / 2, ancho, alto);
+            ctxMapa.restore();
+            return;
+        }
+        ctxMapa.scale(escala, escala);
         ctxMapa.fillStyle = '#fff7df';
         ctxMapa.strokeStyle = '#704f1e';
         ctxMapa.lineWidth = 0.8;
@@ -1534,7 +1683,7 @@
         ctxMapa.restore();
     }
 
-    function dibujarMapa() {
+    function dibujarMapa(ahora = performance.now()) {
         const rect = canvasMapa.getBoundingClientRect();
         const w = Math.max(1, rect.width);
         const h = Math.max(1, rect.height);
@@ -1553,7 +1702,11 @@
         ctxMapa.fillStyle = bg;
         ctxMapa.fillRect(0, 0, w, h);
 
-        // Retícula de atlas para reforzar la lectura del globo sin deformarlo.
+        const boundsMapa = obtenerBoundsMapa(w, h);
+        if (recursosMapa.mundo) {
+            ctxMapa.drawImage(recursosMapa.mundo, boundsMapa.x, boundsMapa.y, boundsMapa.width, boundsMapa.height);
+        } else {
+        // Fallback sencillo si el mapa retro no pudo cargarse.
         ctxMapa.strokeStyle = 'rgba(190,224,225,0.10)';
         ctxMapa.lineWidth = 0.7;
         for (let lon = -150; lon <= 150; lon += 30) {
@@ -1577,11 +1730,12 @@
             ctxMapa.fillStyle = tierra; ctxMapa.fill();
             ctxMapa.strokeStyle = 'rgba(232,200,116,0.34)'; ctxMapa.lineWidth = 0.9; ctxMapa.stroke();
         });
+        }
 
         // Ruta del destino anterior al seleccionado.
         const indiceOrigen = Math.max(0, paisSeleccionado - 1);
-        const origen = proyectar(paises[indiceOrigen].lon, paises[indiceOrigen].lat, w, h);
-        const destino = proyectar(paises[paisSeleccionado].lon, paises[paisSeleccionado].lat, w, h);
+        const origen = posicionPais(paises[indiceOrigen], w, h);
+        const destino = posicionPais(paises[paisSeleccionado], w, h);
         const control = controlRuta(origen, destino, w, h);
         ctxMapa.save();
         ctxMapa.setLineDash([3, 5]);
@@ -1589,27 +1743,49 @@
         ctxMapa.beginPath(); ctxMapa.moveTo(origen.x, origen.y); ctxMapa.quadraticCurveTo(control.x, control.y, destino.x, destino.y); ctxMapa.stroke();
         ctxMapa.restore();
 
+        if (paisSeleccionado === 0) {
+            const mexico = posicionPais(paises[0], w, h);
+            const transcurrido = Math.min(1, (ahora - seleccionMapaInicio) / (movimientoReducido.matches ? 1 : 650));
+            const rebote = movimientoReducido.matches ? 0 : Math.sin(transcurrido * Math.PI * 2.5) * (1 - transcurrido) * 7;
+            const ambiente = movimientoReducido.matches ? 0 : Math.sin(ahora / 1200) * 1.4;
+            const entradaY = (1 - transcurrido) * 34 + rebote + ambiente;
+            if (recursosMapa.mexico) {
+                const alto = Math.max(64, Math.min(150, h * 0.15));
+                const ancho = alto * recursosMapa.mexico.naturalWidth / recursosMapa.mexico.naturalHeight;
+                ctxMapa.save(); ctxMapa.globalAlpha = transcurrido;
+                ctxMapa.drawImage(recursosMapa.mexico, mexico.x - ancho * 0.5, mexico.y - alto + entradaY, ancho, alto);
+                ctxMapa.restore();
+            } else if (recursosFallidos.has('mexico')) {
+                ctxMapa.save(); ctxMapa.strokeStyle = '#f4ca64'; ctxMapa.lineWidth = 2;
+                ctxMapa.strokeRect(mexico.x - 13, mexico.y - 34 + entradaY, 26, 24); ctxMapa.restore();
+            }
+        }
+
         regionesMarcadores = [];
         paises.forEach((pais, i) => {
             const prog = progreso[i];
             const completo = prog.nivelesCompletados >= NIVELES_POR_PAIS;
-            const punto = proyectar(pais.lon, pais.lat, w, h);
+            const punto = posicionPais(pais, w, h);
             const seleccionado = i === paisSeleccionado;
             const color = !prog.unlocked ? '#71808a' : completo ? '#45d39a' : '#f4ca64';
-            const lx = punto.x + pais.etiqueta[0] * Math.min(1, w / 390);
-            const ly = punto.y + pais.etiqueta[1] * Math.min(1, h / 210);
+            const lx = Math.max(boundsMapa.x + 16, Math.min(boundsMapa.x + boundsMapa.width - 16, punto.x + pais.etiqueta[0] * Math.min(1, w / 390)));
+            const ly = Math.max(boundsMapa.y + 16, Math.min(boundsMapa.y + boundsMapa.height - 16, punto.y + pais.etiqueta[1] * Math.min(1, h / 210)));
+            const pulso = seleccionado && !movimientoReducido.matches ? 1 + (Math.sin(ahora / 230) + 1) * 0.16 : 1;
             ctxMapa.strokeStyle = `${color}99`; ctxMapa.lineWidth = 0.75;
             ctxMapa.beginPath(); ctxMapa.moveTo(punto.x, punto.y); ctxMapa.lineTo(lx, ly); ctxMapa.stroke();
             if (seleccionado) {
-                ctxMapa.beginPath(); ctxMapa.arc(punto.x, punto.y, 8, 0, Math.PI * 2);
-                ctxMapa.strokeStyle = color; ctxMapa.lineWidth = 1.4; ctxMapa.stroke();
+                ctxMapa.beginPath(); ctxMapa.arc(punto.x, punto.y, 8 * pulso, 0, Math.PI * 2);
+                ctxMapa.strokeStyle = '#ffffff'; ctxMapa.lineWidth = 1.7; ctxMapa.stroke();
             }
             ctxMapa.beginPath(); ctxMapa.arc(punto.x, punto.y, seleccionado ? 4.2 : 3.1, 0, Math.PI * 2);
             ctxMapa.fillStyle = color; ctxMapa.shadowColor = color; ctxMapa.shadowBlur = prog.unlocked ? 7 : 0; ctxMapa.fill(); ctxMapa.shadowBlur = 0;
-            const texto = !prog.unlocked ? '🔒' : pais.bandera;
+            const texto = !prog.unlocked ? '🔒' : completo ? '⭐' : pais.bandera;
             ctxMapa.font = `${seleccionado ? 13 : 11}px Arial`; ctxMapa.textAlign = 'center'; ctxMapa.textBaseline = 'middle';
             ctxMapa.fillText(texto, lx, ly);
-            regionesMarcadores.push({ i, x: lx, y: ly, radio: 13 });
+            regionesMarcadores.push(
+                { i, x: punto.x, y: punto.y, radio: 18 },
+                { i, x: lx, y: ly, radio: 16 }
+            );
         });
 
         if (viajeEnCurso) {
@@ -1617,8 +1793,37 @@
             const pos = puntoRuta(origen, control, destino, t);
             const siguiente = puntoRuta(origen, control, destino, Math.min(1, t + 0.012));
             const angulo = Math.atan2(siguiente.y - pos.y, siguiente.x - pos.x) + Math.sin(t * Math.PI) * 0.12;
-            dibujarAvion(pos, angulo, 0.72 + Math.sin(t * Math.PI) * 0.18);
+            const escalaVuelo = 0.62 + Math.sin(t * Math.PI) * 0.28 - Math.max(0, t - 0.82) * 0.35;
+            dibujarAvion(pos, angulo, escalaVuelo);
         }
+    }
+
+    function detenerAnimacionMapa() {
+        if (mapaIdleFrame) cancelAnimationFrame(mapaIdleFrame);
+        mapaIdleFrame = 0;
+    }
+
+    function iniciarAnimacionMapa() {
+        detenerAnimacionMapa();
+        if (movimientoReducido.matches) { dibujarMapa(); return; }
+        const animar = ahora => {
+            if (!document.getElementById('pantalla-mapa').classList.contains('activa') || viajeEnCurso) {
+                mapaIdleFrame = 0; return;
+            }
+            dibujarMapa(ahora);
+            mapaIdleFrame = requestAnimationFrame(animar);
+        };
+        mapaIdleFrame = requestAnimationFrame(animar);
+    }
+
+    async function abrirMapaMundial() {
+        mostrarPantalla('pantalla-mapa');
+        mapaCargando.classList.remove('oculto-carga');
+        dibujarMapa();
+        await promesaRecursosMapa;
+        if (!document.getElementById('pantalla-mapa').classList.contains('activa')) return;
+        mapaCargando.classList.add('oculto-carga');
+        actualizarMapa();
     }
 
     function cancelarViaje() {
@@ -1634,10 +1839,12 @@
     }
 
     function iniciarViaje(indiceDestino) {
+        if (viajeEnCurso) return;
         cancelarViaje();
+        detenerAnimacionMapa();
         const token = viajeToken;
         const inicio = performance.now();
-        const duracion = 2700;
+        const duracion = movimientoReducido.matches ? 450 : 2700;
         viajeEnCurso = { progreso: 0 };
         btnJugarPais.disabled = true;
         btnMapaPrev.disabled = true;
@@ -1664,7 +1871,7 @@
                 const nivel = Math.min(progreso[indiceDestino].nivelesCompletados + 1, NIVELES_POR_PAIS);
                 mostrarPantalla('pantalla-juego');
                 iniciarNivel(indiceDestino, nivel);
-            }, 1250);
+            }, movimientoReducido.matches ? 650 : 1250);
             viajeTemporizadores.push(espera);
         }
         vueloFrame = requestAnimationFrame(animarVuelo);
@@ -1672,9 +1879,11 @@
 
     function actualizarMapa() {
         cancelarViaje();
+        seleccionMapaInicio = performance.now();
         const p = paises[paisSeleccionado];
         const prog = progreso[paisSeleccionado];
         document.getElementById('info-pais').textContent = `${p.bandera} ${p.nombre}`;
+        document.getElementById('info-saludo').textContent = p.saludo;
         document.getElementById('info-nivel').textContent = prog.unlocked
             ? `Nivel ${Math.min(prog.nivelesCompletados + 1, NIVELES_POR_PAIS)}/${NIVELES_POR_PAIS}`
             : 'Bloqueado';
@@ -1684,13 +1893,17 @@
         btnJugarPais.textContent = prog.unlocked ? '✈️ Viajar y jugar' : '🔒 Bloqueado';
         btnJugarPais.disabled = !prog.unlocked;
         dibujarMapa();
+        iniciarAnimacionMapa();
     }
 
     canvasMapa.addEventListener('pointerup', (e) => {
         if (viajeEnCurso) return;
         const rect = canvasMapa.getBoundingClientRect();
         const x = e.clientX - rect.left, y = e.clientY - rect.top;
-        const region = regionesMarcadores.find(r => Math.hypot(r.x - x, r.y - y) <= r.radio);
+        const region = regionesMarcadores
+            .map(r => ({ ...r, distancia: Math.hypot(r.x - x, r.y - y) }))
+            .filter(r => r.distancia <= r.radio)
+            .sort((a, b) => a.distancia - b.distancia)[0];
         if (region) {
             paisSeleccionado = region.i;
             actualizarMapa();
