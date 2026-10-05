@@ -197,6 +197,7 @@
             border-radius: 10px 10px 0 0;
         }
         #info-pais { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.15rem; }
+        #info-ciudad { font-weight: 900; font-size: 0.62rem; letter-spacing: 0.14em; color: var(--gold-bright); margin-top: 1px; }
         #info-nivel { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
         #info-saludo { color: var(--stamp-red); font-weight: 800; font-size: 0.7rem; letter-spacing: 0.1em; margin-top: 2px; }
         @media (prefers-reduced-motion: reduce) {
@@ -378,6 +379,7 @@
         }
         #pantalla-mapa .info-viaje::before { background: linear-gradient(90deg, #1cc8df, #ff8c30); }
         #pantalla-mapa #info-pais { color: #fff; }
+        #pantalla-mapa #info-ciudad { color: #83eaff; }
         #pantalla-mapa #info-saludo { color: #ff9b3e; }
         #pantalla-mapa #btn-jugar-pais {
             position: absolute; z-index: 6; right: max(12px, env(safe-area-inset-right));
@@ -474,14 +476,41 @@
             .inicio-secundarios { flex-direction:column; gap:7px; }
             .inicio-secundarios .boton { min-height:38px; padding:7px 12px; font-size:.7rem; }
             #pantalla-juego .barra-superior { height:42px; }
-            .avatar { width:28px;height:28px }.jugador{min-width:125px;padding:2px 6px}.jugador small{display:none}
+            .avatar { width:28px;height:28px }.jugador{min-width:125px;padding:2px 6px}.jugador small{display:block;font-size:.5rem}
             .hud-inferior { height:36px }.hud-inferior .boton{min-height:31px}.selector-impacto{font-size:.48rem}#bola-impacto{width:28px;height:28px}
-            #canvas-juego { max-height:calc(100vh - 91px); width:min(100%,calc((100vh - 91px)*2)); }
+            #canvas-juego { max-height:calc(100vh - 112px); width:min(100%,calc((100vh - 112px)*2)); }
             .barra-potencia { height:68%; min-height:112px; }
             .resultado-tarjeta { display:grid; grid-template-columns:90px 1fr; align-items:center; padding:12px 18px; }
             .resultado-bandera { grid-row:1/4 }.resultado-acciones { grid-column:1/3 }.recompensa{margin:4px}
         }
         @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
+        /* Avisos en su propia fila: no cubren mesa, guía ni controles. */
+        #pantalla-juego .evento-juego { position:static; flex:0 0 18px; height:18px; padding:0 4px; border:0; border-radius:0; background:transparent; transform:none; text-align:center; font:700 clamp(9px,1.2vw,12px) Arial,sans-serif; letter-spacing:.02em; line-height:18px; }
+        #pantalla-juego .evento-juego.visible { animation:avisoTurno 2.4s ease both; }
+        @keyframes avisoTurno { 0%,100%{opacity:0} 8%,85%{opacity:1} }
+        @media (prefers-reduced-motion:reduce) { #pantalla-juego .evento-juego.visible { animation:none; opacity:1; } }
+        #pantalla-modos { gap:10px; padding:12px 24px; overflow:auto; }
+        #pantalla-modos h2 { margin:0; font-size:clamp(20px,5vh,36px); }
+        .tarjetas-modos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:min(900px,95%); }
+        .tarjeta-modo { min-height:clamp(65px,20vh,140px); padding:12px; border:2px solid #f4ca64; border-radius:14px; background:linear-gradient(135deg,#064a61,#032440); color:#fff0ca; cursor:pointer; touch-action:manipulation; }
+        .tarjeta-modo strong,.tarjeta-modo span { display:block; }
+        .tarjeta-modo strong { font:900 clamp(15px,2vw,24px) Impact,Arial,sans-serif; letter-spacing:.05em; }
+        .tarjeta-modo span { margin-top:8px; font:700 12px Arial,sans-serif; }
+        .tarjeta-modo:disabled { opacity:.5; cursor:default; }
+        #nombres-local { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+        #nombres-local label { font-size:12px; }
+        #nombres-local input { display:block; width:180px; padding:10px; border-radius:7px; border:1px solid #f4ca64; }
+        #nombres-local .boton,#btn-modos-menu { width:auto; margin:0; padding:10px 20px; }
+        #pantalla-modos [hidden],#pantalla-juego [hidden] { display:none!important; }
+        #pantalla-juego.practica .hud-inferior { grid-template-columns:repeat(4,minmax(0,1fr)); }
+        #pantalla-juego.practica .selector-impacto { display:none; }
+        #pantalla-juego.practica #btn-salir-juego { width:auto; }
+        #pantalla-juego .hud-inferior #btn-practica-rack,#pantalla-juego .hud-inferior #btn-practica-mano { font-size:clamp(9px,1.3vw,13px); }
+        #pantalla-juego .jugador.activo { border-color:#f4ca64; }
+        #pantalla-juego .jugador strong { max-width:145px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        #resultado-titulo { overflow-wrap:anywhere; }
+        @media (max-width:850px) and (orientation:landscape) { #pantalla-juego .marcador-central { flex-direction:column; gap:2px; } #pantalla-juego #juego-info { font-size:10px; } .turno-chip { max-width:200px; overflow:hidden; text-overflow:ellipsis; } }
+        #pausa-modo { color:#f4ca64; font-weight:800; }
     </style>
 </head>
 <body>
@@ -526,7 +555,8 @@
                 </div>
             </div>
             <div class="info-viaje">
-                <p id="info-pais">🇲🇽 México</p>
+                <p id="info-pais">🇲🇽 MÉXICO</p>
+                <p id="info-ciudad">CIUDAD DE MÉXICO</p>
                 <p id="info-saludo">¡HOLA!</p>
                 <p id="info-nivel">Nivel 1/10</p>
             </div>
@@ -536,14 +566,14 @@
         <!-- ===== JUEGO ===== -->
         <div id="pantalla-juego" class="pantalla">
             <div class="barra-superior">
-                <div class="jugador"><span class="avatar">😎</span><span><strong>Tú</strong><small>● ● ● · LISAS</small></span><span class="bolas-asignadas" aria-label="Bolas lisas"><i class="mini-bola"></i><i class="mini-bola"></i><i class="mini-bola"></i></span></div>
+                <div class="jugador"><span class="avatar">😎</span><span><strong id="nombre-jugador">Tú</strong><small id="grupo-jugador">Mesa abierta</small></span></div>
                 <div class="marcador-central"><strong id="juego-info">🇲🇽 1/10</strong><span id="turno-chip" class="turno-chip">TU TURNO</span><strong id="juego-tiros">25 tiros</strong><span id="juego-monedas" class="oculto">0</span></div>
-                <div class="jugador rival"><span class="avatar">🤠</span><span><strong>El Catrín</strong><small>● ● ● · RAYADAS</small></span></div>
+                <div class="jugador rival"><span class="avatar">🤠</span><span><strong id="nombre-rival">El Catrín</strong><small id="grupo-rival">Mesa abierta</small></span></div>
                 <button id="btn-pausa" aria-label="Pausar">Ⅱ</button>
             </div>
+            <div id="evento-juego" class="evento-juego" aria-live="polite"></div>
             <div class="zona-mesa">
                 <canvas id="canvas-juego" width="960" height="480" aria-label="Mesa de Billar Mundial"></canvas>
-                <div id="evento-juego" class="evento-juego" aria-live="polite"></div>
                 <div id="barra-potencia" class="barra-potencia" role="slider" aria-label="Potencia del tiro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
                     <span class="potencia-titulo">POTENCIA</span>
                     <div class="potencia-canal"><div class="potencia-carga"></div></div>
@@ -553,6 +583,8 @@
             </div>
             <div class="hud-inferior">
                 <div class="selector-impacto"><div id="bola-impacto" aria-label="Punto de impacto futuro"><span id="punto-impacto"></span></div><span>EFECTO<br>PRÓXIMAMENTE</span></div>
+                <button class="boton" id="btn-practica-rack" hidden>REACOMODAR BOLAS</button>
+                <button class="boton" id="btn-practica-mano" hidden>BOLA EN MANO</button>
                 <button class="boton" id="btn-reiniciar-nivel">🔄 Reiniciar</button>
                 <button class="boton boton-secundario" id="btn-salir-juego">🚪 Salir</button>
             </div>
@@ -571,12 +603,28 @@
             </div>
         </div>
 
+        <div id="pantalla-modos" class="pantalla">
+            <h2>ELIGE CÓMO JUGAR</h2>
+            <div class="tarjetas-modos">
+                <button class="tarjeta-modo" id="btn-modo-practica"><strong>PRÁCTICA</strong><span>Una mesa libre, a tu ritmo</span></button>
+                <button class="tarjeta-modo" id="btn-modo-gira"><strong>GIRA MUNDIAL</strong><span>Viaja, vence al rival y desbloquea países</span></button>
+                <button class="tarjeta-modo" id="btn-modo-local"><strong>DOS JUGADORES</strong><span>Dos personas en este dispositivo</span></button>
+                <button class="tarjeta-modo" id="btn-modo-online" disabled aria-disabled="true"><strong>MULTIJUGADOR EN LÍNEA</strong><span>PRÓXIMAMENTE</span></button>
+            </div>
+            <form id="nombres-local" hidden>
+                <label>Jugador 1 <input id="nombre-local-1" maxlength="24" placeholder="JUGADOR 1" autocomplete="off"></label>
+                <label>Jugador 2 <input id="nombre-local-2" maxlength="24" placeholder="JUGADOR 2" autocomplete="off"></label>
+                <button class="boton" type="submit" id="btn-iniciar-local">JUGAR</button>
+            </form>
+            <button class="boton boton-secundario" id="btn-modos-menu">VOLVER AL MENÚ</button>
+        </div>
+
         <!-- ===== RESULTADO ===== -->
         <div id="pantalla-resultado" class="pantalla">
             <div class="resultado-tarjeta">
                 <div class="resultado-bandera">🇲🇽</div>
                 <h2 id="resultado-titulo">¡VICTORIA!</h2>
-                <p class="resultado-pais">MÉXICO · NIVEL <span id="resultado-nivel">1</span></p>
+                <p class="resultado-pais">MÉXICO · BOLA 8</p>
                 <p id="resultado-recompensa" class="recompensa">★ +10 MONEDAS</p>
                 <div class="resultado-acciones">
                     <button class="boton boton-secundario" id="btn-resultado-mapa">VOLVER AL MAPA</button>
@@ -588,6 +636,8 @@
         <!-- ===== PAUSA ===== -->
         <div id="pantalla-pausa" class="pantalla">
             <h2>⏸ Pausa</h2>
+            <p id="pausa-modo"></p>
+            <button class="boton boton-secundario" id="btn-cambiar-modo">CAMBIAR MODO</button>
             <button class="boton" id="btn-reanudar">▶️ Reanudar</button>
             <button class="boton boton-secundario" id="btn-reiniciar-pais">🔄 Reiniciar Nivel</button>
             <button class="boton boton-secundario" id="btn-salir-pausa">🚪 Salir</button>
@@ -608,6 +658,8 @@
                     </select>
                 </div>
             </div>
+            <button class="boton boton-secundario" id="btn-reset-progreso">Reiniciar progreso</button>
+            <p id="estado-guardado" role="status"></p>
             <button class="boton boton-secundario" id="btn-cerrar-config" style="width:60%;">⬅️ Cerrar</button>
         </div>
 
@@ -620,6 +672,8 @@
     </div>
 
     <script src="matter.min.js"></script>
+    <script src="eight-ball.js"></script>
+    <script src="ball-visual.js"></script>
     <script>
     // ============================================================
     //  BILLAR MUNDIAL — versión corregida y estable
@@ -636,25 +690,216 @@
     // ============================================================
 
     const paises = [
-        { nombre: 'México', bandera: '🇲🇽', saludo: '¡HOLA!', lon: -102, lat: 23, mapX: 0.20, mapY: 0.52, etiqueta: [-4, 18] },
-        { nombre: 'Canadá', bandera: '🇨🇦', saludo: 'HELLO!', lon: -106, lat: 57, mapX: 0.18, mapY: 0.27, etiqueta: [-18, -19] },
-        { nombre: 'Estados Unidos', bandera: '🇺🇸', saludo: 'HEY!', lon: -98, lat: 39, mapX: 0.19, mapY: 0.40, etiqueta: [24, -3] },
-        { nombre: 'Holanda', bandera: '🇳🇱', saludo: 'HALLO!', lon: 5.3, lat: 52.1, mapX: 0.495, mapY: 0.335, etiqueta: [-49, -29] },
-        { nombre: 'Alemania', bandera: '🇩🇪', saludo: 'HALLO!', lon: 10.4, lat: 51.1, mapX: 0.515, mapY: 0.35, etiqueta: [5, -32] },
-        { nombre: 'Suiza', bandera: '🇨🇭', saludo: 'GRÜEZI!', lon: 8.2, lat: 46.8, mapX: 0.505, mapY: 0.39, etiqueta: [-47, 7] },
-        { nombre: 'Letonia', bandera: '🇱🇻', saludo: 'SVEIKI!', lon: 24.6, lat: 57, mapX: 0.55, mapY: 0.30, etiqueta: [49, -22] },
-        { nombre: 'Noruega', bandera: '🇳🇴', saludo: 'HEI!', lon: 8.5, lat: 61, mapX: 0.50, mapY: 0.24, etiqueta: [30, -51] },
-        { nombre: 'Italia', bandera: '🇮🇹', saludo: 'CIAO!', lon: 12.5, lat: 42.8, mapX: 0.52, mapY: 0.43, etiqueta: [-3, 29] },
-        { nombre: 'Grecia', bandera: '🇬🇷', saludo: 'YASSOU!', lon: 22, lat: 39, mapX: 0.56, mapY: 0.44, etiqueta: [48, 24] }
+        { nombre: 'México', ciudad: 'CIUDAD DE MÉXICO', bandera: '🇲🇽', saludo: '¡HOLA!', lon: -102, lat: 23, geoX: 0.17335510407900492, geoY: 0.5258127163725408, markerOffsetX: -4, markerOffsetY: 18, monumento: 'assets/countries/mexico/mexico-landmark.png', escalaMonumento: 1.18, landmarkOffsetX: 0, landmarkOffsetY: -8 },
+        { nombre: 'Canadá', ciudad: 'TORONTO', bandera: '🇨🇦', saludo: 'HELLO!', lon: -106, lat: 57, geoX: 0.2871029542414371, geoY: 0.3258633792113485, markerOffsetX: -18, markerOffsetY: -19, monumento: 'assets/countries/canada/canada-landmark.png', escalaMonumento: 0.92, landmarkOffsetX: 0, landmarkOffsetY: 2 },
+        { nombre: 'Estados Unidos', ciudad: 'NUEVA YORK', bandera: '🇺🇸', saludo: 'HELLO!', lon: -98, lat: 39, geoX: 0.2560808132880465, geoY: 0.38638858397365533, markerOffsetX: 24, markerOffsetY: -3, monumento: 'assets/countries/usa/usa-landmark.png', escalaMonumento: 0.9, landmarkOffsetX: 12, landmarkOffsetY: 1 },
+        { nombre: 'Holanda', ciudad: 'ÁMSTERDAM', bandera: '🇳🇱', saludo: 'HALLO!', lon: 5.3, lat: 52.1, geoX: 0.5194648727550686, geoY: 0.27722705395592334, markerOffsetX: -49, markerOffsetY: -29, monumento: 'assets/countries/netherlands/netherlands-landmark.png', escalaMonumento: 0.72, landmarkOffsetX: -26, landmarkOffsetY: 5 },
+        { nombre: 'Alemania', ciudad: 'BERLÍN', bandera: '🇩🇪', saludo: 'HALLO!', lon: 10.4, lat: 51.1, geoX: 0.5279807545854112, geoY: 0.30208562019758506, markerOffsetX: 5, markerOffsetY: -32, monumento: 'assets/countries/germany/germany-landmark.png', escalaMonumento: 0.7, landmarkOffsetX: 8, landmarkOffsetY: 6 },
+        { nombre: 'Suiza', ciudad: 'ZÚRICH', bandera: '🇨🇭', saludo: 'GRÜEZI!', lon: 8.2, lat: 46.8, geoX: 0.5237228136702399, geoY: 0.32694418643924683, markerOffsetX: -47, markerOffsetY: 7, monumento: 'assets/countries/switzerland/switzerland-landmark.png', escalaMonumento: 0.68, landmarkOffsetX: -18, landmarkOffsetY: 12 },
+        { nombre: 'Letonia', ciudad: 'RIGA', bandera: '🇱🇻', saludo: 'SVEIKI!', lon: 24.6, lat: 57, geoX: 0.5644773910011648, geoY: 0.2469644515747699, markerOffsetX: 49, markerOffsetY: -22, monumento: 'assets/countries/latvia/latvia-landmark.png', escalaMonumento: 0.68, landmarkOffsetX: 25, landmarkOffsetY: 3 },
+        { nombre: 'Noruega', ciudad: 'BERGEN', bandera: '🇳🇴', saludo: 'HEI!', lon: 8.5, lat: 61, geoX: 0.5194648727550686, geoY: 0.2199442708773115, markerOffsetX: 30, markerOffsetY: -51, monumento: 'assets/countries/norway/norway-landmark.png', escalaMonumento: 0.7, landmarkOffsetX: -8, landmarkOffsetY: 0 },
+        { nombre: 'Italia', ciudad: 'ROMA', bandera: '🇮🇹', saludo: 'CIAO!', lon: 12.5, lat: 42.8, geoX: 0.5358883591421577, geoY: 0.3582875960482986, markerOffsetX: -3, markerOffsetY: 29, monumento: 'assets/countries/italy/italy-landmark.png', escalaMonumento: 0.68, landmarkOffsetX: 4, landmarkOffsetY: 16 },
+        { nombre: 'Grecia', ciudad: 'ATENAS', bandera: '🇬🇷', saludo: 'ΓΕΙΑ!', lon: 22, lat: 39, geoX: 0.5638691137275689, geoY: 0.39611584902474034, markerOffsetX: 48, markerOffsetY: 24, monumento: 'assets/countries/greece/greece-landmark.png', escalaMonumento: 0.68, landmarkOffsetX: 28, landmarkOffsetY: 16 }
     ];
     const NIVELES_POR_PAIS = 10;
     const BOLAS_POR_NIVEL = [6,7,8,9,10,10,12,13,15,15]; // más bolas = más difícil
 
-    // ---- Estado del progreso (solo en memoria de esta sesión) ----
+    // ---- Progreso versionado; las coordenadas de calibración nunca se persisten. ----
     let progreso = paises.map((p, i) => ({ unlocked: i === 0, nivelesCompletados: 0 }));
     let paisSeleccionado = 0;
     let monedasTotales = 0;
     let dificultad = 'medio';
+    const CLAVE_PROGRESO = 'billarmundial.progress.v1';
+    let recompensas = [];
+    cargarProgreso();
+    let estadoApp = 'menu';
+    let gameMode = 'worldTour';
+    let nombresJugadores = ['JUGADOR 1', 'JUGADOR 2'];
+    const nombresModos = { practice:'PRÁCTICA', worldTour:'GIRA MUNDIAL', localMatch:'DOS JUGADORES' };
+    let partida = EightBall.create();
+    let rivalTimer = null;
+    let sesionPartida = 0;
+    let resultadoResuelto = false;
+    let quietoDesde = null;
+    let colocandoBlanca = false;
+
+    function cargarProgreso() {
+        try {
+            const guardado = JSON.parse(localStorage.getItem(CLAVE_PROGRESO));
+            if (!guardado || guardado.version !== 1 || !Array.isArray(guardado.paises)) return;
+            progreso = paises.map((_, i) => ({ unlocked: i === 0 || guardado.paises[i]?.unlocked === true,
+                nivelesCompletados: guardado.paises[i]?.completed === true ? NIVELES_POR_PAIS : 0 }));
+            monedasTotales = Number.isSafeInteger(guardado.monedas) && guardado.monedas >= 0 ? guardado.monedas : 0;
+            recompensas = Array.isArray(guardado.recompensas) ? guardado.recompensas.filter(id => /^pais-\d+$/.test(id)) : [];
+        } catch { /* Un archivo inválido no impide jugar. */ }
+    }
+    function guardarProgreso() {
+        try {
+            localStorage.setItem(CLAVE_PROGRESO, JSON.stringify({ version:1, monedas:monedasTotales, recompensas,
+                paises:progreso.map(p => ({ unlocked:p.unlocked, completed:p.nivelesCompletados >= NIVELES_POR_PAIS })) }));
+            document.getElementById('estado-guardado').textContent = '';
+        } catch {
+            document.getElementById('estado-guardado').textContent = 'El navegador no permite guardar progreso. Esta sesión sigue disponible.';
+        }
+    }
+    function cancelarRival() { if (rivalTimer !== null) clearTimeout(rivalTimer); rivalTimer = null; }
+    function volverAlMapa() {
+        cancelarRival(); sesionPartida++; esperandoResultado = false; golpeAnim = null;
+        paisSeleccionado = paisActual;
+        if (gameMode === 'worldTour') abrirMapaMundial();
+        else mostrarPantalla('pantalla-inicio');
+    }
+    function mostrarSelectorModo() {
+        cancelarRival(); sesionPartida++; esperandoResultado = false; golpeAnim = null;
+        document.getElementById('nombres-local').hidden = true;
+        mostrarPantalla('pantalla-modos');
+    }
+    function elegirModo(modo) {
+        if (!['practice','worldTour','localMatch'].includes(modo)) return;
+        cancelarRival(); sesionPartida++; gameMode = modo;
+        if (modo === 'worldTour') abrirMapaMundial();
+        else iniciarNivel(0,1);
+    }
+    function turnoHumano() { return gameMode !== 'worldTour' || partida.turn === 0; }
+    function configurarInterfazModo() {
+        const practica = gameMode === 'practice';
+        document.getElementById('pantalla-juego').classList.toggle('practica', practica);
+        document.getElementById('btn-practica-rack').hidden = !practica;
+        document.getElementById('btn-practica-mano').hidden = !practica;
+        document.getElementById('btn-reiniciar-nivel').textContent = practica ? 'REINICIAR MESA' : 'REINICIAR PARTIDA';
+        document.getElementById('btn-salir-juego').textContent = gameMode === 'worldTour' ? 'VOLVER AL MAPA' : 'VOLVER AL MENÚ';
+        document.getElementById('btn-salir-pausa').textContent = gameMode === 'worldTour' ? 'VOLVER AL MAPA' : 'VOLVER AL MENÚ';
+        document.getElementById('btn-resultado-mapa').textContent = gameMode === 'worldTour' ? 'VOLVER AL MAPA' : 'VOLVER AL MENÚ';
+        document.getElementById('btn-resultado-repetir').textContent = gameMode === 'localMatch' ? 'REVANCHA' : 'JUGAR DE NUEVO';
+    }
+    function reacomodarPractica() {
+        if (gameMode !== 'practice' || estadoApp !== 'playing' || !todasQuietas() || esperandoResultado || golpeAnim) return;
+        const posicion = { ...cueBall.position };
+        iniciarNivel(0,1);
+        if (posicionBlancaValida(posicion)) {
+            Matter.Body.setPosition(cueBall, posicion);
+            BallVisual.anchor(cueBall.plugin.visual, posicion);
+        }
+        anunciarEvento('Bolas reacomodadas');
+    }
+    function finalizarLocal(ganador) {
+        if (resultadoResuelto) return;
+        resultadoResuelto = true; puedeDisparar = false;
+        document.getElementById('resultado-titulo').textContent = `¡GANA ${nombresJugadores[ganador]}!`;
+        document.querySelector('.resultado-bandera').textContent = '🏆';
+        document.querySelector('.resultado-pais').textContent = 'DOS JUGADORES · BOLA 8';
+        document.getElementById('resultado-recompensa').textContent = '¡Bien jugado! ¿Una revancha?';
+        mostrarPantalla('pantalla-resultado');
+    }
+    function actualizarRodamiento() {
+        [cueBall,...ballsArr.filter(e => !e.isPocketed).map(e => e.body)].filter(Boolean).forEach(body => {
+            const visual = body.plugin.visual || (body.plugin.visual = BallVisual.create(body.position));
+            if (body.plugin.falling || body.plugin.enManoPendiente || Math.hypot(body.velocity.x,body.velocity.y) <= .05) { BallVisual.anchor(visual,body.position); return; }
+            BallVisual.advance(visual,body.position,body.circleRadius,movimientoReducido.matches);
+        });
+    }
+
+    function registrarContactoReglas(a, b) {
+        if (!partida.shot || estadoApp !== 'playing') return;
+        const objetivo = a === cueBall && b.label === 'ball' ? b : b === cueBall && a.label === 'ball' ? a : null;
+        if (objetivo) EightBall.contact(partida, objetivo.plugin.numero);
+        const movil = a.label === 'rail' ? b : b.label === 'rail' ? a : null;
+        if (movil && (movil.label === 'ball' || movil === cueBall)) EightBall.rail(partida, movil === cueBall ? 0 : movil.plugin.numero);
+    }
+    function actualizarTurno(aviso) {
+        const nombres = { solids:'Lisas', stripes:'Rayadas' };
+        [0,1].forEach(j => {
+            const grupo = partida.groups[j];
+            const restantes = ballsArr.filter(e => !e.isPocketed && EightBall.group(e.body.plugin.numero) === grupo).length;
+            document.getElementById(j ? 'grupo-rival' : 'grupo-jugador').textContent = grupo ? `${nombres[grupo]} · ${restantes} restantes` : 'Mesa abierta';
+        });
+        if (gameMode === 'practice') {
+            document.getElementById('grupo-jugador').textContent = 'Mesa libre';
+            document.getElementById('grupo-rival').textContent = '';
+        }
+        const texto = gameMode === 'practice' ? 'Práctica' : gameMode === 'localMatch' ? `Turno de ${nombresJugadores[partida.turn]}` : partida.turn === 0 ? 'Tu turno' : 'Turno del rival';
+        document.getElementById('nombre-jugador').textContent = gameMode === 'localMatch' ? nombresJugadores[0] : 'Tú';
+        document.getElementById('nombre-rival').textContent = gameMode === 'localMatch' ? nombresJugadores[1] : 'El Catrín';
+        document.querySelector('.jugador.rival').hidden = gameMode === 'practice';
+        document.querySelector('.jugador').classList.toggle('activo', partida.turn === 0);
+        document.querySelector('.jugador.rival').classList.toggle('activo', partida.turn === 1);
+        document.getElementById('btn-practica-rack').disabled = !todasQuietas() || esperandoResultado || !!golpeAnim;
+        document.getElementById('btn-practica-mano').disabled = !todasQuietas() || esperandoResultado || !!golpeAnim;
+        turnoChip.textContent = texto.toUpperCase();
+        juegoTiros.textContent = partida.hand ? 'BOLA EN MANO' : gameMode === 'practice' ? 'MESA LIBRE' : nombres[partida.groups[partida.turn]]?.toUpperCase() || 'MESA ABIERTA';
+        barraPotencia.setAttribute('aria-disabled', String(!controlDisponible()));
+        anunciarEvento(aviso || `${texto}${partida.hand ? ' · Bola en mano: toca y suelta en un lugar libre' : ''}`, partida.hand ? 'falta' : 'turno');
+    }
+    function posicionBlancaValida(pos, ignorar = null) {
+        return Number.isFinite(pos.x) && Number.isFinite(pos.y) &&
+            pos.x >= LIMITE.izquierda + RADIO_BOLA && pos.x <= LIMITE.derecha - RADIO_BOLA &&
+            pos.y >= LIMITE.arriba + RADIO_BOLA && pos.y <= LIMITE.abajo - RADIO_BOLA &&
+            ballsArr.filter(e => !e.isPocketed && e.body !== ignorar).every(e => Math.hypot(pos.x - e.body.position.x, pos.y - e.body.position.y) >= RADIO_BOLA * 2 + 1) &&
+            walls.every(w => !Matter.Bounds.contains(w.bounds, pos));
+    }
+    function colocarBlanca(pos) {
+        if (!partida.hand || !posicionBlancaValida(pos)) return false;
+        Matter.Body.setPosition(cueBall, pos);
+        Matter.Body.setVelocity(cueBall, { x:0, y:0 });
+        Matter.Body.setAngularVelocity(cueBall, 0);
+        cueBall.plugin.ultimaPosicionValida = { ...pos };
+        BallVisual.anchor(cueBall.plugin.visual, cueBall.position);
+        return true;
+    }
+    function caminoLibre(desde, hasta, ignorar = []) {
+        const dx = hasta.x - desde.x, dy = hasta.y - desde.y, largo2 = dx * dx + dy * dy;
+        return ballsArr.filter(e => !e.isPocketed && !ignorar.includes(e.body)).every(e => {
+            const t = Math.max(0, Math.min(1, ((e.body.position.x - desde.x) * dx + (e.body.position.y - desde.y) * dy) / Math.max(1,largo2)));
+            return Math.hypot(e.body.position.x - desde.x - t * dx, e.body.position.y - desde.y - t * dy) > RADIO_BOLA * 2 + 1;
+        });
+    }
+    function elegirTiroRival() {
+        const legales = EightBall.legal(partida, 1);
+        const objetivos = ballsArr.filter(e => !e.isPocketed && legales.includes(e.body.plugin.numero));
+        const candidatos = [];
+        objetivos.forEach(({body}) => pockets.forEach(tronera => {
+            const dx = tronera.position.x - body.position.x, dy = tronera.position.y - body.position.y, distancia = Math.hypot(dx,dy);
+            if (!distancia) return;
+            const normal = { x:dx/distancia, y:dy/distancia };
+            const fantasma = { x:body.position.x - normal.x * RADIO_BOLA * 2, y:body.position.y - normal.y * RADIO_BOLA * 2 };
+            const cx = fantasma.x - cueBall.position.x, cy = fantasma.y - cueBall.position.y, recorrido = Math.hypot(cx,cy);
+            const alineacion = (cx * normal.x + cy * normal.y) / Math.max(1,recorrido);
+            if (alineacion < .25 || !posicionBlancaValida(fantasma, body)) return;
+            if (!caminoLibre(cueBall.position, fantasma, [body]) || !caminoLibre(body.position, tronera.position, [body])) return;
+            candidatos.push({ direccion:{ x:cx/recorrido,y:cy/recorrido }, potencia:Math.min(.85, Math.max(.24,(recorrido + distancia) / 1100)), puntuacion:alineacion * 3 - (recorrido + distancia) / 1300 });
+        }));
+        candidatos.sort((a,b) => b.puntuacion-a.puntuacion);
+        if (candidatos.length) return candidatos[0];
+        // Un tiro defensivo simple al objetivo legal más próximo que no esté tapado.
+        const directos = objetivos.map(({body}) => {
+            const dx = body.position.x-cueBall.position.x, dy = body.position.y-cueBall.position.y, d=Math.hypot(dx,dy);
+            return {body,d,direccion:{x:dx/d,y:dy/d},potencia:Math.min(.7,Math.max(.28,d/900))};
+        }).sort((a,b)=>a.d-b.d);
+        return directos.find(c => caminoLibre(cueBall.position,c.body.position,[c.body])) || directos[0] || null;
+    }
+    function programarRival() {
+        if (gameMode !== 'worldTour' || rivalTimer !== null || estadoApp !== 'playing' || partida.turn !== 1 || partida.finished || esperandoResultado || golpeAnim || !todasQuietas()) return;
+        const token = sesionPartida;
+        const timer = setTimeout(() => {
+            if (rivalTimer !== timer) return;
+            rivalTimer = null;
+            if (gameMode !== 'worldTour' || token !== sesionPartida || estadoApp !== 'playing' || partida.turn !== 1 || !todasQuietas() || esperandoResultado || partida.finished) return;
+            if (partida.hand) {
+                // Placement permitted only by ball in hand, identical validation to the human.
+                let colocada = false;
+                for (let x = 180; x < 830 && !colocada; x += 50) for (let y = 110; y < 390 && !colocada; y += 50) colocada = colocarBlanca({x,y});
+                if (!colocada) return;
+                partida.hand = false;
+            }
+            const tiro = partida.breaking ? { direccion:{x:1,y:0}, potencia:.9 } : elegirTiroRival();
+            if (!tiro) return;
+            const error = (Math.random() - .5) * .045;
+            const angulo = Math.atan2(tiro.direccion.y,tiro.direccion.x) + error;
+            direccionTiro = {x:Math.cos(angulo),y:Math.sin(angulo)};
+            efectuarDisparo(Math.max(.1,Math.min(1,tiro.potencia + (Math.random()-.5)*.08)));
+        }, 900);
+        rivalTimer = timer;
+    }
 
     function paramsDificultad() {
         if (dificultad === 'facil') return { pocketMult: 1.35, tirosExtra: 8 };
@@ -755,6 +1000,7 @@
             event.pairs.forEach(pair => {
                 let pocket = null, ball = null, isCue = false;
                 const a = pair.bodyA, b = pair.bodyB;
+                registrarContactoReglas(a, b);
                 const objetivoImpactado = a === cueBall && b.label === 'ball' ? b : (b === cueBall && a.label === 'ball' ? a : null);
                 if (objetivoImpactado && prediccionActiva && objetivoImpactado === prediccionActiva.objetivo && !medicionColision) {
                     medicionColision = { objetivo: objetivoImpactado, normal: prediccionActiva.normal };
@@ -835,6 +1081,7 @@
         cueStartPos = { x: 255, y: h / 2 };
         cueBall = Matter.Bodies.circle(cueStartPos.x, cueStartPos.y, RADIO_BOLA, { restitution: 0.9, friction: 0.045, frictionAir: 0.012, label: 'cueBall' });
         cueBall.plugin = { ultimaPosicionValida: { ...cueStartPos }, falling: null };
+        cueBall.plugin.visual = BallVisual.create(cueBall.position);
         Matter.Composite.add(world, cueBall);
 
         const rackCompleto = generarPosicionesRack(15, 650, h / 2, RADIO_BOLA * 2 + 1.5);
@@ -845,6 +1092,7 @@
                 restitution: 0.9, friction: 0.05, frictionAir: 0.012, label: 'ball'
             });
             body.plugin = { isPocketed: false, numero: ordenRack[i], ultimaPosicionValida: { x: p.x, y: p.y }, falling: null };
+            body.plugin.visual = BallVisual.create(body.position);
             Matter.Composite.add(world, body);
             ballsArr.push({ body, isPocketed: false });
         });
@@ -883,6 +1131,7 @@
     function iniciarCaida(ball, pocket, validacion) {
         ball.plugin = ball.plugin || {};
         if (ball.plugin.falling || ball.plugin.isPocketed) return;
+        EightBall.sink(partida, ball === cueBall ? 0 : ball.plugin.numero);
         ball.plugin.falling = {
             inicio: tiempoFisicoMs,
             desde: { x: ball.position.x, y: ball.position.y },
@@ -902,7 +1151,7 @@
     function evaluarTroneras() {
         const cuerpos = [cueBall, ...ballsArr.filter(e => !e.isPocketed).map(e => e.body)].filter(Boolean);
         cuerpos.forEach(ball => {
-            if (ball.plugin && (ball.plugin.falling || ball.plugin.isPocketed)) return;
+            if (ball.plugin && (ball.plugin.falling || ball.plugin.isPocketed || ball.plugin.enManoPendiente)) return;
             for (const pocket of pockets) {
                 const validacion = validarCapturaTronera(ball, pocket);
                 if (validacion.valida) { iniciarCaida(ball, pocket, validacion); break; }
@@ -942,6 +1191,7 @@
         Matter.Body.setAngularVelocity(body, 0);
         if (!Number.isFinite(body.angle)) Matter.Body.setAngle(body, 0);
         body.plugin.ultimaPosicionValida = { ...segura };
+        if (body.plugin.visual) BallVisual.anchor(body.plugin.visual, body.position);
         registrarDiagnostico(body, causa, { estadoDetectado, restauradaEn: segura });
     }
 
@@ -961,11 +1211,9 @@
                 body.plugin.falling = null;
                 body.collisionFilter.category = caida.filtro.category;
                 body.collisionFilter.mask = caida.filtro.mask;
-                const segura = posicionSinSolapamiento(cueStartPos, body);
-                Matter.Body.setPosition(body, segura);
-                Matter.Body.setVelocity(body, { x: 0, y: 0 });
-                body.plugin.ultimaPosicionValida = { ...segura };
-                registrarDiagnostico(body, 'bola blanca repuesta tras embocada', { restauradaEn: segura });
+                // La blanca embocada no vuelve a interferir con el tiro en curso.
+                body.plugin.enManoPendiente = true;
+                Matter.Composite.remove(world, body);
             } else {
                 body.plugin.falling = null;
                 body.plugin.isPocketed = true;
@@ -992,6 +1240,7 @@
         const presentes = new Set(Matter.Composite.allBodies(world));
         [cueBall, ...ballsArr.filter(e => !e.isPocketed).map(e => e.body)].filter(Boolean).forEach(body => {
             if (body.plugin && body.plugin.falling) return;
+            if (body.plugin && body.plugin.enManoPendiente) return;
             if (!presentes.has(body)) { restaurarBola(body, 'cuerpo ausente sin embocada'); return; }
             const finita = Number.isFinite(body.position.x) && Number.isFinite(body.position.y) &&
                 Number.isFinite(body.velocity.x) && Number.isFinite(body.velocity.y);
@@ -1011,6 +1260,7 @@
     function pasoFisicoFijo() {
         limitarVelocidades();
         Matter.Engine.update(engine, PASO_FISICO_MS);
+        actualizarRodamiento();
         tiempoFisicoMs += PASO_FISICO_MS;
         evaluarTroneras();
         actualizarCaidas();
@@ -1018,7 +1268,7 @@
     }
 
     // ---- Dibujo ----
-    function dibujarBola(x, y, numero = 0) {
+    function dibujarBola(x, y, numero = 0, visual = null, moviendo = false) {
         const r = RADIO_BOLA;
         const esBlanca = numero === 0;
         const esRayada = numero > 8;
@@ -1039,28 +1289,45 @@
         ctx.fillStyle = grd; ctx.fill();
         ctx.lineWidth = 0.8; ctx.strokeStyle = 'rgba(8,12,11,0.7)'; ctx.stroke();
 
+        const orientacion = visual || { q:[1,0,0,0] };
         if (esRayada) {
+            // La franja es una banda sobre la esfera, proyectada desde su orientación.
+            const normal = BallVisual.project(orientacion,[0,1,0]);
             ctx.save();
-            ctx.beginPath(); ctx.arc(x, y, r - 0.7, 0, Math.PI * 2); ctx.clip();
-            const franja = ctx.createLinearGradient(x, y - r * 0.62, x, y + r * 0.62);
-            franja.addColorStop(0, colorPrincipal); franja.addColorStop(0.18, colorPrincipal);
-            franja.addColorStop(0.21, '#f4efe0'); franja.addColorStop(0.79, '#f4efe0');
-            franja.addColorStop(0.82, colorPrincipal); franja.addColorStop(1, colorPrincipal);
-            ctx.fillStyle = franja; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+            ctx.beginPath(); ctx.arc(x,y,r-.7,0,Math.PI*2); ctx.clip();
+            ctx.fillStyle = '#f4efe0';
+            const paso = 1.1;
+            for (let sy=-r; sy<r; sy+=paso) {
+                let inicio = null;
+                for (let sx=-r; sx<=r+paso; sx+=paso) {
+                    const u=sx/r,v=sy/r,z2=1-u*u-v*v;
+                    const enFranja=z2>=0 && Math.abs(normal.x*u+normal.y*v+normal.z*Math.sqrt(z2))<.58;
+                    if (enFranja && inicio===null) inicio=sx;
+                    if (!enFranja && inicio!==null) { ctx.fillRect(x+inicio,y+sy,sx-inicio,paso+.2); inicio=null; }
+                }
+            }
             ctx.restore();
         }
 
-        if (!esBlanca) {
-            ctx.beginPath();
-            ctx.arc(x, y, r * 0.47, 0, Math.PI * 2);
-            ctx.fillStyle = '#f8f4e8'; ctx.fill();
-            ctx.fillStyle = '#171a19'; ctx.font = '800 7.5px Inter, Arial';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(numero), x, y + 0.4);
+        const marca = moviendo ? BallVisual.project(orientacion,[0,0,1]) : {x:0,y:0,z:1};
+        if (!esBlanca && marca.z > .05) {
+            const eje = moviendo ? BallVisual.project(orientacion,[1,0,0]) : {x:1,y:0};
+            ctx.save();
+            ctx.translate(x+marca.x*r*.68,y+marca.y*r*.68);
+            ctx.rotate(Math.atan2(eje.y,eje.x));
+            ctx.scale(1,Math.max(.2,marca.z));
+            ctx.beginPath(); ctx.arc(0,0,r*.47,0,Math.PI*2);
+            ctx.fillStyle='#f8f4e8';ctx.fill();
+            ctx.fillStyle='#171a19';ctx.font='800 7.5px Inter, Arial';
+            ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(numero),0,.4);
+            ctx.restore();
         }
-
+        // Detalle adherido a la superficie: también permite ver rodar la blanca.
+        let reflejo = BallVisual.project(orientacion,[-.37,-.43,.824]);
+        if (reflejo.z<0) reflejo={x:-reflejo.x,y:-reflejo.y,z:-reflejo.z};
         ctx.beginPath();
-        ctx.ellipse(x - r * 0.37, y - r * 0.43, r * 0.25, r * 0.16, -0.6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.78)'; ctx.fill();
+        ctx.ellipse(x+reflejo.x*r*.76,y+reflejo.y*r*.76,r*.23,r*Math.max(.07,reflejo.z*.16),Math.atan2(reflejo.y,reflejo.x),0,Math.PI*2);
+        ctx.fillStyle=esBlanca ? 'rgba(139,151,160,.35)' : 'rgba(255,255,255,.72)';ctx.fill();
     }
 
     // ---- Taco de billar ----
@@ -1190,7 +1457,7 @@
     }
 
     function dibujarGuia() {
-        if (!cueBall || !puedeDisparar || !todasQuietas()) return;
+        if (!controlDisponible()) return;
         const guia = calcularGuia();
         if (!guia) return;
         ctx.save();
@@ -1225,14 +1492,14 @@
 
     function dibujarBolaFisica(body, numero) {
         const caida = body.plugin && body.plugin.falling;
-        if (!caida) { dibujarBola(body.position.x, body.position.y, numero); return; }
+        if (!caida) { dibujarBola(body.position.x, body.position.y, numero, body.plugin.visual, Math.hypot(body.velocity.x, body.velocity.y) > .05); return; }
         const progreso = Math.min(1, (tiempoFisicoMs - caida.inicio) / DURACION_CAIDA_MS);
         ctx.save();
         ctx.globalAlpha = Math.max(0.12, 1 - progreso * 0.78);
         ctx.translate(body.position.x, body.position.y);
         const escala = 1 - progreso * 0.72;
         ctx.scale(escala, escala);
-        dibujarBola(0, 0, numero);
+        dibujarBola(0, 0, numero, body.plugin.visual, false);
         ctx.restore();
     }
 
@@ -1320,7 +1587,7 @@
             dibujarBolaFisica(body, body.plugin.numero);
         });
         dibujarTaco();
-        if (cueBall) dibujarBolaFisica(cueBall, 0);
+        if (cueBall && !cueBall.plugin.enManoPendiente) dibujarBolaFisica(cueBall, 0);
 
         const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
         ctx.fillStyle = 'rgba(255,244,215,0.88)'; ctx.font = '700 11px Inter, Arial'; ctx.textAlign = 'left';
@@ -1346,9 +1613,9 @@
         } else {
             ultimoFrameFisico = null;
         }
-        rafId = requestAnimationFrame(loopStep);
+        rafId = estadoApp === 'playing' ? requestAnimationFrame(loopStep) : null;
     }
-    if (!rafId) rafId = requestAnimationFrame(loopStep);
+
 
     function todasQuietas() {
         const umbral = 0.05;
@@ -1367,56 +1634,72 @@
     }
 
     function revisarSiSeDetuvieron() {
-        if (!esperandoResultado) return;
-        if (!todasQuietas()) return;
+        if (!esperandoResultado || !partida.shot) return;
+        if (!todasQuietas()) { quietoDesde = null; return; }
+        if (quietoDesde === null) { quietoDesde = tiempoFisicoMs; return; }
+        if (tiempoFisicoMs - quietoDesde < 150) return;
+        quietoDesde = null;
         esperandoResultado = false;
+        golpeAnim = null;
+        const resultado = gameMode === 'practice' ? { winner:null, foul:partida.shot.scratch ? 'Blanca embocada' : null } : EightBall.resolve(partida);
+        if (gameMode === 'practice') { partida.hand = partida.shot.scratch; partida.shot = null; partida.turn = 0; }
+        if (!resultado) return;
+        if (resultado.winner !== null) {
+            if (gameMode === 'localMatch') finalizarLocal(resultado.winner);
+            else if (resultado.winner === 0) ganarNivel(); else perderNivel(resultado.reason);
+            return;
+        }
+        if (cueBall.plugin.enManoPendiente) {
+            cueBall.plugin.enManoPendiente = false;
+            Matter.Body.setPosition(cueBall, posicionSinSolapamiento(cueStartPos, cueBall));
+            Matter.Body.setVelocity(cueBall, { x:0, y:0 });
+            BallVisual.anchor(cueBall.plugin.visual, cueBall.position);
+            Matter.Composite.add(world, cueBall);
+        }
         puedeDisparar = true;
         actualizarBarraPotencia(0);
-        turnoChip.classList.remove('cambio');
-        void turnoChip.offsetWidth;
-        turnoChip.classList.add('cambio');
-        anunciarEvento('TU TURNO', 'turno');
-
-        const bolasVivas = ballsArr.filter(e => !e.isPocketed).length;
-        if (bolasVivas === 0) {
-            ganarNivel();
-        } else if (tirosRestantes <= 0) {
-            perderNivel();
-        }
+        actualizarTurno(resultado.foul ? `Falta · ${resultado.foul} · Bola en mano` : null);
+        programarRival();
     }
 
     function ganarNivel() {
+        if (gameMode !== 'worldTour') return;
+        if (resultadoResuelto) return;
+        resultadoResuelto = true;
         puedeDisparar = false;
-        const monedasGanadas = 10 * nivelActual;
-        monedasTotales += monedasGanadas;
-        juegoMonedas.textContent = `💰 ${monedasTotales}`;
-        const prog = progreso[paisActual];
-        prog.nivelesCompletados = Math.max(prog.nivelesCompletados, nivelActual);
-        if (paisActual === 0) prog.nivelesCompletados = NIVELES_POR_PAIS;
-        if (nivelActual >= NIVELES_POR_PAIS && paisActual + 1 < paises.length) {
-            progreso[paisActual + 1].unlocked = true;
-        }
+        const id = `pais-${paisActual}`;
+        const monedasGanadas = recompensas.includes(id) ? 0 : 10;
+        if (monedasGanadas) { recompensas.push(id); monedasTotales += monedasGanadas; }
+        progreso[paisActual].nivelesCompletados = NIVELES_POR_PAIS;
+        if (paisActual + 1 < paises.length) progreso[paisActual + 1].unlocked = true;
+        guardarProgreso();
         mostrarResultado(true, monedasGanadas);
     }
 
-    function perderNivel() {
+    function perderNivel(razon = 'El rival ganó la partida') {
+        if (gameMode !== 'worldTour') return;
+        if (resultadoResuelto) return;
+        resultadoResuelto = true;
         puedeDisparar = false;
-        mostrarResultado(false, 0);
+        mostrarResultado(false, 0, razon);
     }
 
-    function mostrarResultado(victoria, recompensa) {
+    function mostrarResultado(victoria, recompensa, razon = '') {
         ultimoResultadoVictoria = victoria;
         if (runner) runner.enabled = false;
         document.getElementById('resultado-titulo').textContent = victoria ? '¡VICTORIA!' : 'DERROTA';
-        document.getElementById('resultado-nivel').textContent = nivelActual;
-        document.getElementById('resultado-recompensa').textContent = victoria ? `★ +${recompensa} MONEDAS` : '★ INTÉNTALO DE NUEVO';
+        document.querySelector('.resultado-bandera').textContent = paises[paisActual].bandera;
+        document.querySelector('.resultado-pais').textContent = `${paises[paisActual].nombre.toUpperCase()} · BOLA 8`;
+        document.getElementById('resultado-recompensa').textContent = victoria ? (recompensa ? `★ +${recompensa} MONEDAS · ${paises[paisActual + 1]?.nombre || 'Gira'} desbloqueado` : '★ País completado · Recompensa ya recibida') : `★ ${razon} · Recompensa: 0 monedas`;
         mostrarPantalla('pantalla-resultado');
     }
 
     // ---- Iniciar un nivel ----
     function iniciarNivel(paisIdx, nivel) {
+        cancelarRival(); sesionPartida++;
+        partida = EightBall.create(); resultadoResuelto = false; quietoDesde = null; colocandoBlanca = false;
         paisActual = paisIdx;
-        nivelActual = nivel;
+        nivelActual = 1;
         const dif = paramsDificultad();
         tirosRestantes = Math.max(8, 25 - (nivel - 1) + dif.tirosExtra);
         puedeDisparar = true;
@@ -1425,15 +1708,18 @@
         cargandoPotencia = false;
         golpeAnim = null;
 
-        juegoInfo.textContent = `${paises[paisIdx].bandera} ${nivel}/${NIVELES_POR_PAIS}`;
-        juegoTiros.textContent = `${tirosRestantes} TIROS`;
+        configurarInterfazModo();
+        juegoInfo.textContent = gameMode === 'worldTour' ? `${paises[paisIdx].bandera} BOLA 8` : nombresModos[gameMode];
+        juegoTiros.textContent = 'MESA ABIERTA';
         juegoMonedas.textContent = `💰 ${monedasTotales}`;
 
         document.getElementById('mensaje-fin-nivel').classList.add('oculto');
         document.getElementById('mensaje-gameover').classList.add('oculto');
 
         resizeCanvas();
-        construirMesa(BOLAS_POR_NIVEL[nivel - 1] || 15);
+        construirMesa(15);
+        mostrarPantalla('pantalla-juego');
+        actualizarTurno(gameMode === 'practice' ? 'Práctica · Apunta y ajusta potencia' : gameMode === 'localMatch' ? `${nombresJugadores[0]} · Rompimiento inicial` : 'Tu turno · Rompimiento inicial');
         if (runner) runner.enabled = true;
     }
 
@@ -1444,7 +1730,7 @@
     }
 
     function controlDisponible() {
-        return puedeDisparar && !esperandoResultado && !golpeAnim && !!cueBall && todasQuietas();
+        return estadoApp === 'playing' && turnoHumano() && !partida.hand && puedeDisparar && !esperandoResultado && !golpeAnim && !!cueBall && todasQuietas();
     }
 
     function orientarHacia(pos) {
@@ -1455,14 +1741,24 @@
     }
 
     canvas.addEventListener('pointerdown', e => {
+        if (estadoApp === 'playing' && turnoHumano() && partida.hand && todasQuietas()) {
+            e.preventDefault(); colocandoBlanca = true; canvas.setPointerCapture(e.pointerId); colocarBlanca(getPos(e)); return;
+        }
         if (!controlDisponible()) return;
         e.preventDefault(); apuntando = true; canvas.setPointerCapture(e.pointerId); orientarHacia(getPos(e));
     });
     canvas.addEventListener('pointermove', e => {
+        if (colocandoBlanca) { e.preventDefault(); colocarBlanca(getPos(e)); return; }
         if (!apuntando) return;
         e.preventDefault(); orientarHacia(getPos(e));
     });
     const terminarPunteria = e => {
+        if (colocandoBlanca) {
+            colocandoBlanca = false;
+            if (e.type !== 'pointercancel' && posicionBlancaValida(getPos(e))) { colocarBlanca(getPos(e)); partida.hand = false; actualizarTurno(); }
+            if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+            return;
+        }
         if (!apuntando) return;
         apuntando = false;
         if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
@@ -1529,6 +1825,8 @@
     }
 
     function efectuarDisparo(potencia) {
+        if (estadoApp !== 'playing' || !todasQuietas() || !EightBall.begin(partida)) return;
+        puedeDisparar = false; quietoDesde = null;
         const rapidez = 4 + potencia * 20;
         const velocidad = { x: direccionTiro.x * rapidez, y: direccionTiro.y * rapidez };
         const producto = productoPuntoTiro(velocidad, direccionTiro);
@@ -1538,8 +1836,7 @@
         prediccionActiva = guiaDisparo && guiaDisparo.objetivo ? { objetivo: guiaDisparo.objetivo, normal: { ...guiaDisparo.normal } } : null;
         medicionColision = null;
         Matter.Body.setVelocity(cueBall, velocidad);
-        tirosRestantes--;
-        juegoTiros.textContent = `${tirosRestantes} TIROS`;
+        actualizarTurno();
         esperandoResultado = true;
         actualizarBarraPotencia(0);
     }
@@ -1567,24 +1864,51 @@
 
     // ---- Navegación entre pantallas ----
     function mostrarPantalla(id) {
-        if (id !== 'pantalla-mapa') { cancelarViaje(); detenerAnimacionMapa(); }
+        cancelarRival();
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null; ultimoFrameFisico = null;
+        estadoApp = ({ 'pantalla-modos':'modeSelect', 'pantalla-juego':'playing', 'pantalla-pausa':'paused', 'pantalla-mapa':'map', 'pantalla-resultado':'result' })[id] || 'menu';
+        if (id === 'pantalla-pausa') document.getElementById('pausa-modo').textContent = nombresModos[gameMode];
+        if (runner) runner.enabled = estadoApp === 'playing';
+        cancelarViaje(); detenerAnimacionMapa();
         document.getElementById('app').classList.toggle('modo-juego', id === 'pantalla-juego');
         if (id !== 'pantalla-juego') {
-            apuntando = false;
+            apuntando = false; colocandoBlanca = false;
             cancelarCargaPotencia();
         }
         document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
         document.getElementById(id).classList.add('activa');
+        if (estadoApp === 'playing') { rafId = requestAnimationFrame(loopStep); programarRival(); }
     }
 
-    document.getElementById('btn-viaje').onclick = abrirMapaMundial;
+    document.getElementById('btn-viaje').onclick = mostrarSelectorModo;
+    document.getElementById('btn-modos-menu').onclick = () => mostrarPantalla('pantalla-inicio');
+    document.getElementById('btn-modo-practica').onclick = () => elegirModo('practice');
+    document.getElementById('btn-modo-gira').onclick = () => elegirModo('worldTour');
+    document.getElementById('btn-modo-local').onclick = () => { document.getElementById('nombres-local').hidden = false; };
+    document.getElementById('nombres-local').addEventListener('submit', e => {
+        e.preventDefault();
+        nombresJugadores = [1,2].map(i => document.getElementById(`nombre-local-${i}`).value.trim().slice(0,24) || `JUGADOR ${i}`);
+        elegirModo('localMatch');
+    });
+    document.getElementById('btn-cambiar-modo').onclick = () => {
+        if (!confirm('¿Cambiar de modo? Se perderá la partida activa.')) return;
+        mostrarSelectorModo();
+    };
+    document.getElementById('btn-practica-rack').onclick = reacomodarPractica;
+    document.getElementById('btn-practica-mano').onclick = () => {
+        if (gameMode !== 'practice' || estadoApp !== 'playing' || !todasQuietas() || esperandoResultado || golpeAnim) return;
+        partida.hand = true; actualizarTurno();
+    };
     document.getElementById('btn-volver-inicio-mapa').onclick = () => mostrarPantalla('pantalla-inicio');
 
     document.getElementById('btn-mapa-prev').onclick = () => {
+        if (estadoApp !== 'map') return;
         paisSeleccionado = (paisSeleccionado - 1 + paises.length) % paises.length;
         actualizarMapa();
     };
     document.getElementById('btn-mapa-next').onclick = () => {
+        if (estadoApp !== 'map') return;
         paisSeleccionado = (paisSeleccionado + 1) % paises.length;
         actualizarMapa();
     };
@@ -1605,13 +1929,12 @@
         if (runner) runner.enabled = true;
         mostrarPantalla('pantalla-juego');
     };
-    document.getElementById('btn-salir-pausa').onclick = () => {
-        mostrarPantalla('pantalla-inicio');
-    };
+    document.getElementById('btn-salir-pausa').onclick = volverAlMapa;
     document.getElementById('btn-salir-juego').onclick = () => {
+        if (gameMode === 'practice') { volverAlMapa(); return; }
         if (confirm('¿Seguro que quieres salir? Perderás el progreso de este nivel.')) {
             if (runner) runner.enabled = false;
-            mostrarPantalla('pantalla-inicio');
+            volverAlMapa();
         }
     };
     document.getElementById('btn-reiniciar-nivel').onclick = () => {
@@ -1621,6 +1944,12 @@
         if (runner) runner.enabled = true;
         mostrarPantalla('pantalla-juego');
         iniciarNivel(paisActual, nivelActual);
+    };
+    document.getElementById('btn-reset-progreso').onclick = () => {
+        if (!confirm('¿Reiniciar todo el progreso, monedas y países desbloqueados?')) return;
+        progreso = paises.map((_, i) => ({ unlocked:i === 0, nivelesCompletados:0 }));
+        monedasTotales = 0; recompensas = []; paisSeleccionado = 0; guardarProgreso();
+        document.getElementById('estado-guardado').textContent = 'Progreso reiniciado';
     };
     document.getElementById('btn-cerrar-config').onclick = () => mostrarPantalla('pantalla-inicio');
     document.getElementById('btn-cerrar-coleccion').onclick = () => mostrarPantalla('pantalla-inicio');
@@ -1640,12 +1969,7 @@
         document.getElementById('mensaje-gameover').classList.add('oculto');
         iniciarNivel(paisActual, nivelActual);
     };
-    document.getElementById('btn-resultado-mapa').onclick = () => {
-        paisSeleccionado = paisActual;
-        actualizarMapa();
-        mostrarPantalla('pantalla-mapa');
-        iniciarAnimacionMapa();
-    };
+    document.getElementById('btn-resultado-mapa').onclick = volverAlMapa;
     document.getElementById('btn-resultado-repetir').onclick = () => {
         mostrarPantalla('pantalla-juego');
         iniciarNivel(paisActual, nivelActual);
@@ -1701,7 +2025,7 @@
     const rutasRecursosMapa = {
         mundo: 'assets/map/world-map-retro.png',
         avion: 'assets/map/plane-retro.png',
-        mexico: 'assets/countries/mexico/mexico-landmark.png'
+        ...Object.fromEntries(paises.map((pais, indice) => [`monumento${indice}`, pais.monumento]))
     };
     const recursosMapa = {};
     const recursosFallidos = new Set();
@@ -1752,8 +2076,8 @@
     function posicionPais(pais, w, h) {
         const bounds = obtenerBoundsMapa(w, h);
         return {
-            x: bounds.x + pais.mapX * bounds.width,
-            y: bounds.y + pais.mapY * bounds.height
+            x: bounds.x + pais.geoX * bounds.width,
+            y: bounds.y + pais.geoY * bounds.height
         };
     }
 
@@ -1877,22 +2201,49 @@
         ctxMapa.beginPath(); ctxMapa.moveTo(origen.x, origen.y); ctxMapa.quadraticCurveTo(control.x, control.y, destino.x, destino.y); ctxMapa.stroke();
         ctxMapa.restore();
 
-        if (paisSeleccionado === 0) {
-            const mexico = posicionPais(paises[0], w, h);
-            const transcurrido = Math.min(1, (ahora - seleccionMapaInicio) / (movimientoReducido.matches ? 1 : 650));
-            const rebote = movimientoReducido.matches ? 0 : Math.sin(transcurrido * Math.PI * 2.5) * (1 - transcurrido) * 7;
-            const ambiente = movimientoReducido.matches ? 0 : Math.sin(ahora / 1200) * 1.4;
-            const entradaY = (1 - transcurrido) * 34 + rebote + ambiente;
-            if (recursosMapa.mexico) {
-                const alto = Math.max(64, Math.min(150, h * 0.15));
-                const ancho = alto * recursosMapa.mexico.naturalWidth / recursosMapa.mexico.naturalHeight;
-                ctxMapa.save(); ctxMapa.globalAlpha = transcurrido;
-                ctxMapa.drawImage(recursosMapa.mexico, mexico.x - ancho * 0.5, mexico.y - alto + entradaY, ancho, alto);
-                ctxMapa.restore();
-            } else if (recursosFallidos.has('mexico')) {
-                ctxMapa.save(); ctxMapa.strokeStyle = '#f4ca64'; ctxMapa.lineWidth = 2;
-                ctxMapa.strokeRect(mexico.x - 13, mexico.y - 34 + entradaY, 26, 24); ctxMapa.restore();
-            }
+        const paisMonumento = paises[paisSeleccionado];
+        const puntoMonumento = posicionPais(paisMonumento, w, h);
+        const claveMonumento = `monumento${paisSeleccionado}`;
+        const transcurrido = Math.min(1, (ahora - seleccionMapaInicio) / (movimientoReducido.matches ? 1 : 650));
+        const rebote = movimientoReducido.matches ? 0 : Math.sin(transcurrido * Math.PI * 2.5) * (1 - transcurrido) * 7;
+        const ambiente = movimientoReducido.matches ? 0 : Math.sin(ahora / 1200) * 1.4;
+        const entradaY = (1 - transcurrido) * 34 + rebote + ambiente;
+        const offset = [paisMonumento.landmarkOffsetX, paisMonumento.landmarkOffsetY];
+        let etiquetaCiudadPos = null;
+        if (recursosMapa[claveMonumento]) {
+            const imagenMonumento = recursosMapa[claveMonumento];
+            const escalaPais = paisMonumento.escalaMonumento || 1;
+            const baseNatural = paisSeleccionado === 0
+                ? Math.max(64, Math.min(150, h * 0.15))
+                : Math.max(70, Math.min(128, h * 0.18));
+            const altoBase = baseNatural * escalaPais;
+            const proporcion = imagenMonumento.naturalWidth / imagenMonumento.naturalHeight;
+            const alto = Math.min(altoBase, h * 0.3);
+            const ancho = alto * proporcion;
+            const centroX = puntoMonumento.x + offset[0];
+            const baseY = puntoMonumento.y + offset[1];
+            ctxMapa.save(); ctxMapa.globalAlpha = transcurrido;
+            ctxMapa.drawImage(imagenMonumento, centroX - ancho / 2, baseY - alto + entradaY, ancho, alto);
+            ctxMapa.restore();
+            etiquetaCiudadPos = { x: centroX, y: Math.max(58, baseY - alto + entradaY - 8) };
+        } else if (recursosFallidos.has(claveMonumento)) {
+            const x = puntoMonumento.x + offset[0], y = puntoMonumento.y + offset[1] + entradaY;
+            ctxMapa.save(); ctxMapa.strokeStyle = '#f4ca64'; ctxMapa.fillStyle = 'rgba(3,35,65,.88)'; ctxMapa.lineWidth = 2;
+            ctxMapa.beginPath(); ctxMapa.moveTo(x - 16, y); ctxMapa.lineTo(x - 12, y - 25); ctxMapa.lineTo(x, y - 38); ctxMapa.lineTo(x + 12, y - 25); ctxMapa.lineTo(x + 16, y); ctxMapa.closePath(); ctxMapa.fill(); ctxMapa.stroke(); ctxMapa.restore();
+            etiquetaCiudadPos = { x, y: Math.max(58, y - 46) };
+        }
+        if (etiquetaCiudadPos) {
+            const fuenteCiudad = Math.max(8, Math.min(11, w * 0.012));
+            ctxMapa.save();
+            ctxMapa.font = `900 ${fuenteCiudad}px "Arial Black", Arial, sans-serif`;
+            ctxMapa.textAlign = 'center'; ctxMapa.textBaseline = 'middle';
+            const anchoEtiqueta = ctxMapa.measureText(paisMonumento.ciudad).width + 14;
+            const xEtiqueta = Math.max(anchoEtiqueta / 2 + 5, Math.min(w - anchoEtiqueta / 2 - 5, etiquetaCiudadPos.x));
+            ctxMapa.fillStyle = 'rgba(2,25,54,.9)'; ctxMapa.strokeStyle = 'rgba(244,199,91,.92)'; ctxMapa.lineWidth = 1;
+            ctxMapa.fillRect(xEtiqueta - anchoEtiqueta / 2, etiquetaCiudadPos.y - 9, anchoEtiqueta, 18);
+            ctxMapa.strokeRect(xEtiqueta - anchoEtiqueta / 2, etiquetaCiudadPos.y - 9, anchoEtiqueta, 18);
+            ctxMapa.fillStyle = '#fff0ca'; ctxMapa.fillText(paisMonumento.ciudad, xEtiqueta, etiquetaCiudadPos.y + 0.5);
+            ctxMapa.restore();
         }
 
         regionesMarcadores = [];
@@ -1902,8 +2253,8 @@
             const punto = posicionPais(pais, w, h);
             const seleccionado = i === paisSeleccionado;
             const color = !prog.unlocked ? '#71808a' : completo ? '#45d39a' : '#f4ca64';
-            const lx = Math.max(boundsMapa.x + 16, Math.min(boundsMapa.x + boundsMapa.width - 16, punto.x + pais.etiqueta[0] * Math.min(1, w / 390)));
-            const ly = Math.max(boundsMapa.y + 16, Math.min(boundsMapa.y + boundsMapa.height - 16, punto.y + pais.etiqueta[1] * Math.min(1, h / 210)));
+            const lx = Math.max(boundsMapa.x + 16, Math.min(boundsMapa.x + boundsMapa.width - 16, punto.x + pais.markerOffsetX * Math.min(1, w / 390)));
+            const ly = Math.max(boundsMapa.y + 16, Math.min(boundsMapa.y + boundsMapa.height - 16, punto.y + pais.markerOffsetY * Math.min(1, h / 210)));
             const pulso = seleccionado && !movimientoReducido.matches ? 1 + (Math.sin(ahora / 230) + 1) * 0.16 : 1;
             ctxMapa.strokeStyle = `${color}99`; ctxMapa.lineWidth = 0.75;
             ctxMapa.beginPath(); ctxMapa.moveTo(punto.x, punto.y); ctxMapa.lineTo(lx, ly); ctxMapa.stroke();
@@ -1954,11 +2305,12 @@
     }
 
     async function abrirMapaMundial() {
+        if (gameMode !== 'worldTour') return;
         mostrarPantalla('pantalla-mapa');
         mapaCargando.classList.remove('oculto-carga');
         dibujarMapa();
         await promesaRecursosMapa;
-        if (!document.getElementById('pantalla-mapa').classList.contains('activa')) return;
+        if (estadoApp !== 'map' || !document.getElementById('pantalla-mapa').classList.contains('activa')) return;
         mapaCargando.classList.add('oculto-carga');
         actualizarMapa();
     }
@@ -1976,8 +2328,9 @@
     }
 
     function iniciarViaje(indiceDestino) {
-        if (viajeEnCurso) return;
+        if (gameMode !== 'worldTour' || viajeEnCurso || estadoApp !== 'map' || !progreso[indiceDestino].unlocked) return;
         cancelarViaje();
+        estadoApp = 'travelling';
         detenerAnimacionMapa();
         const token = viajeToken;
         const inicio = performance.now();
@@ -2019,7 +2372,8 @@
         seleccionMapaInicio = performance.now();
         const p = paises[paisSeleccionado];
         const prog = progreso[paisSeleccionado];
-        document.getElementById('info-pais').textContent = `${p.bandera} ${p.nombre}`;
+        document.getElementById('info-pais').textContent = `${p.bandera} ${p.nombre.toUpperCase()}`;
+        document.getElementById('info-ciudad').textContent = p.ciudad;
         document.getElementById('info-saludo').textContent = p.saludo;
         document.getElementById('info-nivel').textContent = prog.unlocked
             ? `Nivel ${Math.min(prog.nivelesCompletados + 1, NIVELES_POR_PAIS)}/${NIVELES_POR_PAIS}`
@@ -2064,6 +2418,148 @@
     window.addEventListener('resize', () => {
         if (document.getElementById('pantalla-mapa').classList.contains('activa')) dibujarMapa();
     });
+
+
+    // Herramienta temporal: no escribe almacenamiento ni modifica el progreso.
+    if (new URLSearchParams(window.location.search).get('calibrate-countries') === '1') {
+        const estilo = document.createElement('style');
+        estilo.textContent = `
+            #calibracion { position:fixed; inset:0; z-index:10000; overflow:auto; background:#061824; color:#fff0ca; padding:16px; box-sizing:border-box; font:16px Arial,sans-serif; }
+            #calibracion h2 { margin:0 0 12px; font-size:22px; }
+            #calibracion .herramientas { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+            #calibracion button { padding:10px; cursor:pointer; }
+            #calibracion button:disabled { cursor:default; opacity:.5; }
+            #calibracion ol { display:flex; flex-wrap:wrap; gap:8px 30px; padding-left:26px; }
+            #calibracion li[aria-current="step"] { color:#64e6ff; font-weight:bold; }
+            #calibracion-mapa { position:relative; width:100%; aspect-ratio:1672/941; background:#0b3148; cursor:crosshair; touch-action:manipulation; }
+            #calibracion-imagen { width:100%; height:100%; object-fit:contain; display:block; }
+            #calibracion svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+            #calibracion-json { box-sizing:border-box; width:100%; min-height:180px; margin-top:10px; }
+        `;
+        document.head.appendChild(estilo);
+        const panel = document.createElement('section');
+        panel.id = 'calibracion';
+        panel.innerHTML = `
+            <h2 id="calibracion-instruccion"></h2>
+            <ol>${paises.map(p => `<li>${p.nombre}</li>`).join('')}</ol>
+            <div class="herramientas">
+                <button id="calibracion-deshacer">Deshacer último punto</button>
+                <button id="calibracion-reiniciar">Reiniciar calibración</button>
+                <button id="calibracion-copiar">Copiar coordenadas</button>
+                <button id="calibracion-aplicar">Aplicar coordenadas</button>
+            </div>
+            <p id="calibracion-estado" role="status" aria-live="polite"></p>
+            <div id="calibracion-mapa">
+                <img id="calibracion-imagen" src="assets/map/world-map-retro.png" alt="Mapa mundial completo para calibrar países" draggable="false">
+                <svg id="calibracion-puntos" aria-hidden="true"></svg>
+            </div>
+            <textarea id="calibracion-json" aria-label="Coordenadas JSON listas para pegar" readonly hidden></textarea>
+        `;
+        document.body.appendChild(panel);
+        const imagen = panel.querySelector('img');
+        const superficie = panel.querySelector('#calibracion-mapa');
+        const svg = panel.querySelector('svg');
+        const estado = panel.querySelector('#calibracion-estado');
+        const salida = panel.querySelector('textarea');
+        const puntos = [];
+        const originales = paises.map(p => ({ geoX: p.geoX, geoY: p.geoY }));
+        let aplicado = false;
+        const campos = ['geoX', 'geoY', 'markerOffsetX', 'markerOffsetY', 'landmarkOffsetX', 'landmarkOffsetY'];
+        function coordenadasJSON() {
+            return JSON.stringify(puntos.map((punto, i) => ({ nombre: paises[i].nombre,
+                ...Object.fromEntries(campos.map(campo => [campo, campo in punto ? punto[campo] : paises[i][campo]]))
+            })), null, 2);
+        }
+        function rectanguloImagen() {
+            const rect = imagen.getBoundingClientRect();
+            const escala = Math.min(rect.width / imagen.naturalWidth, rect.height / imagen.naturalHeight);
+            const width = imagen.naturalWidth * escala, height = imagen.naturalHeight * escala;
+            return { left: rect.left + (rect.width - width) / 2, top: rect.top + (rect.height - height) / 2, width, height };
+        }
+        function restaurar() {
+            if (aplicado) paises.forEach((pais, i) => Object.assign(pais, originales[i]));
+            aplicado = false;
+        }
+        function dibujarCalibracion() {
+            panel.querySelector('h2').textContent = puntos.length < paises.length
+                ? `Haz clic en la ubicación real de: ${paises[puntos.length].nombre}`
+                : 'Calibración completa: aplica las coordenadas para revisar los marcadores.';
+            panel.querySelectorAll('li').forEach((li, i) => {
+                li.textContent = `${paises[i].nombre}${i < puntos.length ? ' ✓' : ''}`;
+                if (i === puntos.length) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+            });
+            panel.querySelector('#calibracion-deshacer').disabled = !puntos.length;
+            panel.querySelector('#calibracion-copiar').disabled = puntos.length !== paises.length;
+            panel.querySelector('#calibracion-aplicar').disabled = puntos.length !== paises.length;
+            svg.replaceChildren();
+            if (!imagen.naturalWidth) return;
+            const rect = rectanguloImagen(), contenedor = superficie.getBoundingClientRect();
+            svg.setAttribute('viewBox', `0 0 ${contenedor.width} ${contenedor.height}`);
+            function elemento(tipo, atributos, texto) {
+                const el = document.createElementNS('http://www.w3.org/2000/svg', tipo);
+                Object.entries(atributos).forEach(([k,v]) => el.setAttribute(k,v));
+                if (texto !== undefined) el.textContent = texto;
+                svg.appendChild(el); return el;
+            }
+            puntos.forEach((punto, i) => {
+                const pais = paises[i];
+                const x = rect.left - contenedor.left + punto.geoX * rect.width;
+                const y = rect.top - contenedor.top + punto.geoY * rect.height;
+                if (aplicado) {
+                    const mx = x + pais.markerOffsetX * Math.min(1, contenedor.width / 390);
+                    const my = y + pais.markerOffsetY * Math.min(1, contenedor.height / 210);
+                    const recurso = recursosMapa[`monumento${i}`];
+                    if (recurso) {
+                        const alto = Math.min(90, rect.height * .18) * pais.escalaMonumento;
+                        const ancho = alto * recurso.naturalWidth / recurso.naturalHeight;
+                        elemento('image', { href:pais.monumento, x:x + pais.landmarkOffsetX - ancho / 2,
+                            y:y + pais.landmarkOffsetY - alto, width:ancho, height:alto });
+                    }
+                    elemento('line', { x1:x, y1:y, x2:mx, y2:my, stroke:'#64e6ff', 'stroke-width':1.5 });
+                    elemento('text', { x:mx, y:my, fill:'#fff', 'font-size':13, 'text-anchor':'middle', 'paint-order':'stroke', stroke:'#061824', 'stroke-width':3 }, pais.nombre);
+                }
+                elemento('circle', { cx:x, cy:y, r:10, fill:'#f4ca64', stroke:'#061824', 'stroke-width':2 });
+                elemento('text', { x, y:y + 4, fill:'#061824', 'font-size':12, 'font-weight':'bold', 'text-anchor':'middle' }, i + 1);
+            });
+        }
+        superficie.addEventListener('click', e => {
+            if (!imagen.naturalWidth || puntos.length === paises.length) return;
+            const rect = rectanguloImagen();
+            const geoX = (e.clientX - rect.left) / rect.width;
+            const geoY = (e.clientY - rect.top) / rect.height;
+            if (geoX < 0 || geoX > 1 || geoY < 0 || geoY > 1) return;
+            puntos.push({ geoX, geoY });
+            salida.hidden = true; estado.textContent = ''; dibujarCalibracion();
+        });
+        panel.querySelector('#calibracion-deshacer').onclick = () => {
+            restaurar(); puntos.pop(); salida.hidden = true; estado.textContent = ''; dibujarCalibracion();
+        };
+        panel.querySelector('#calibracion-reiniciar').onclick = () => {
+            restaurar(); puntos.length = 0; salida.hidden = true; estado.textContent = ''; dibujarCalibracion();
+        };
+        panel.querySelector('#calibracion-aplicar').onclick = () => {
+            if (puntos.length !== paises.length) return;
+            paises.forEach((pais, i) => Object.assign(pais, puntos[i]));
+            aplicado = true; dibujarMapa(); dibujarCalibracion();
+            estado.textContent = 'Coordenadas aplicadas solo en memoria. Todos los marcadores y monumentos están visibles para revisión.';
+        };
+        panel.querySelector('#calibracion-copiar').onclick = async () => {
+            if (puntos.length !== paises.length) return;
+            salida.value = coordenadasJSON(); salida.hidden = false;
+            try {
+                await navigator.clipboard.writeText(salida.value);
+                estado.textContent = 'JSON copiado. Disponible también en el campo inferior.';
+            } catch {
+                salida.focus(); salida.select();
+                estado.textContent = 'Selecciona y copia el JSON del campo inferior.';
+            }
+        };
+        imagen.addEventListener('load', dibujarCalibracion);
+        imagen.addEventListener('error', () => { estado.textContent = 'No se pudo cargar world-map-retro.png.'; });
+        new ResizeObserver(dibujarCalibracion).observe(superficie);
+        promesaRecursosMapa.then(dibujarCalibracion);
+        dibujarCalibracion();
+    }
 
     console.log('✅ Billar Mundial listo — motor único, sin fugas de memoria.');
     </script>
